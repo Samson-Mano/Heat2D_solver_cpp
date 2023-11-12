@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{79995eaf-e457-4a63-a7a2-aa4c777b0a90}</ProjectGuid>
+    <RootNamespace>Heat2Dsolvercpp</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>C:\openGL\eigen-3.4.0;C:\openGL\glfw-3.3.8.bin.WIN64\include\;C:\openGL\glew-2.2.0\include\;C:\openGL\glm;C:\openGL\freetype-windows-binaries\include</AdditionalIncludeDirectories>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <OpenMPSupport>true</OpenMPSupport>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\openGL\glew-2.2.0\lib\Release\x64;C:\openGL\glfw-3.3.8.bin.WIN64\lib-vc2022;C:\openGL\freetype-windows-binaries\release dll\win64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);glew32.lib;glfw3.lib;opengl32.lib;freetype.lib</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>C:\openGL\eigen-3.4.0;C:\openGL\glfw-3.3.8.bin.WIN64\include\;C:\openGL\glew-2.2.0\include\;C:\openGL\glm;C:\openGL\freetype-windows-binaries\include</AdditionalIncludeDirectories>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <OpenMPSupport>true</OpenMPSupport>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\openGL\glew-2.2.0\lib\Release\x64;C:\openGL\glfw-3.3.8.bin.WIN64\lib-vc2022;C:\openGL\freetype-windows-binaries\release dll\win64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);glew32.lib;glfw3.lib;opengl32.lib;freetype.lib</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>C:\openGL\eigen-3.4.0;C:\openGL\glfw-3.3.8.bin.WIN64\include\;C:\openGL\glew-2.2.0\include\;C:\openGL\glm;C:\openGL\freetype-windows-binaries\include</AdditionalIncludeDirectories>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <OpenMPSupport>true</OpenMPSupport>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>C:\openGL\glew-2.2.0\lib\Release\x64;C:\openGL\glfw-3.3.8.bin.WIN64\lib-vc2022;C:\openGL\freetype-windows-binaries\release dll\win64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);glew32.lib;glfw3.lib;opengl32.lib;freetype.lib</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\app_window.cpp" />
+    <ClCompile Include="src\events_handler\file_events.cpp" />
+    <ClCompile Include="src\events_handler\mouse_events.cpp" />
+    <ClCompile Include="src\events_handler\mouse_event_handler.cpp" />
+    <ClCompile Include="src\events_handler\Stopwatch_events.cpp" />
+    <ClCompile Include="src\fe_solver\analysis_solver.cpp" />
+    <ClCompile Include="src\fe_solver\wave_vm_solver.cpp" />
+    <ClCompile Include="src\geometry_store\analysis_result_objects\wave_analysis_result_store.cpp" />
+    <ClCompile Include="src\geometry_store\analysis_result_objects\wave_elementline_list_store.cpp" />
+    <ClCompile Include="src\geometry_store\analysis_result_objects\wave_nodes_list_store.cpp" />
+    <ClCompile Include="src\geometry_store\fe_objects\elementline_list_store.cpp" />
+    <ClCompile Include="src\geometry_store\fe_objects\elementtri_list_store.cpp" />
+    <ClCompile Include="src\geometry_store\fe_objects\nodeconstraint_list_store.cpp" />
+    <ClCompile Include="src\geometry_store\fe_objects\nodeinlcond_list_store.cpp" />
+    <ClCompile Include="src\geometry_store\fe_objects\nodeload_list_store.cpp" />
+    <ClCompile Include="src\geometry_store\fe_objects\nodes_list_store.cpp" />
+    <ClCompile Include="src\geometry_store\geometry_buffers\font_atlas.cpp" />
+    <ClCompile Include="src\geometry_store\geometry_buffers\gBuffers.cpp" />
+    <ClCompile Include="src\geometry_store\geometry_buffers\IndexBuffer.cpp" />
+    <ClCompile Include="src\geometry_store\geometry_buffers\Shader.cpp" />
+    <ClCompile Include="src\geometry_store\geometry_buffers\Texture.cpp" />
+    <ClCompile Include="src\geometry_store\geometry_buffers\VertexArray.cpp" />
+    <ClCompile Include="src\geometry_store\geometry_buffers\VertexBuffer.cpp" />
+    <ClCompile Include="src\geometry_store\geometry_buffers\VertexBufferLayout.cpp" />
+    <ClCompile Include="src\geometry_store\geometry_objects\dynamic_line_list_store.cpp" />
+    <ClCompile Include="src\geometry_store\geometry_objects\dynamic_point_list_store.cpp" />
+    <ClCompile Include="src\geometry_store\geometry_objects\label_list_store.cpp" />
+    <ClCompile Include="src\geometry_store\geometry_objects\line_list_store.cpp" />
+    <ClCompile Include="src\geometry_store\geometry_objects\point_list_store.cpp" />
+    <ClCompile Include="src\geometry_store\geometry_objects\tri_list_store.cpp" />
+    <ClCompile Include="src\geometry_store\geom_parameters.cpp" />
+    <ClCompile Include="src\geometry_store\geom_store.cpp" />
+    <ClCompile Include="src\ImGui\imgui.cpp" />
+    <ClCompile Include="src\ImGui\imgui_draw.cpp" />
+    <ClCompile Include="src\ImGui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="src\ImGui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="src\ImGui\imgui_tables.cpp" />
+    <ClCompile Include="src\ImGui\imgui_widgets.cpp" />
+    <ClCompile Include="src\ImGui\implot.cpp" />
+    <ClCompile Include="src\ImGui\implot_items.cpp" />
+    <ClCompile Include="src\ImGui\stb_implement.cpp" />
+    <ClCompile Include="src\tool_window\analysis_window.cpp" />
+    <ClCompile Include="src\tool_window\edge_window.cpp" />
+    <ClCompile Include="src\tool_window\element_window.cpp" />
+    <ClCompile Include="src\tool_window\node_window.cpp" />
+    <ClCompile Include="src\tool_window\options_window.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\app_window.h" />
+    <ClInclude Include="src\events_handler\file_events.h" />
+    <ClInclude Include="src\events_handler\mouse_events.h" />
+    <ClInclude Include="src\events_handler\mouse_event_handler.h" />
+    <ClInclude Include="src\events_handler\Stopwatch_events.h" />
+    <ClInclude Include="src\fe_solver\analysis_solver.h" />
+    <ClInclude Include="src\fe_solver\wave_vm_solver.h" />
+    <ClInclude Include="src\geometry_store\analysis_result_objects\wave_analysis_result_store.h" />
+    <ClInclude Include="src\geometry_store\analysis_result_objects\wave_elementline_list_store.h" />
+    <ClInclude Include="src\geometry_store\analysis_result_objects\wave_nodes_list_store.h" />
+    <ClInclude Include="src\geometry_store\fe_objects\elementline_list_store.h" />
+    <ClInclude Include="src\geometry_store\fe_objects\elementtri_list_store.h" />
+    <ClInclude Include="src\geometry_store\fe_objects\nodeconstraint_list_store.h" />
+    <ClInclude Include="src\geometry_store\fe_objects\nodeinlcond_list_store.h" />
+    <ClInclude Include="src\geometry_store\fe_objects\nodeload_list_store.h" />
+    <ClInclude Include="src\geometry_store\fe_objects\nodes_list_store.h" />
+    <ClInclude Include="src\geometry_store\geometry_buffers\font_atlas.h" />
+    <ClInclude Include="src\geometry_store\geometry_buffers\gBuffers.h" />
+    <ClInclude Include="src\geometry_store\geometry_buffers\IndexBuffer.h" />
+    <ClInclude Include="src\geometry_store\geometry_buffers\Shader.h" />
+    <ClInclude Include="src\geometry_store\geometry_buffers\Texture.h" />
+    <ClInclude Include="src\geometry_store\geometry_buffers\VertexArray.h" />
+    <ClInclude Include="src\geometry_store\geometry_buffers\VertexBuffer.h" />
+    <ClInclude Include="src\geometry_store\geometry_buffers\VertexBufferLayout.h" />
+    <ClInclude Include="src\geometry_store\geometry_objects\dynamic_line_list_store.h" />
+    <ClInclude Include="src\geometry_store\geometry_objects\dynamic_point_list_store.h" />
+    <ClInclude Include="src\geometry_store\geometry_objects\label_list_store.h" />
+    <ClInclude Include="src\geometry_store\geometry_objects\line_list_store.h" />
+    <ClInclude Include="src\geometry_store\geometry_objects\point_list_store.h" />
+    <ClInclude Include="src\geometry_store\geometry_objects\tri_list_store.h" />
+    <ClInclude Include="src\geometry_store\geom_parameters.h" />
+    <ClInclude Include="src\geometry_store\geom_store.h" />
+    <ClInclude Include="src\ImGui\imconfig.h" />
+    <ClInclude Include="src\ImGui\imgui.h" />
+    <ClInclude Include="src\ImGui\imgui_impl_glfw.h" />
+    <ClInclude Include="src\ImGui\imgui_impl_opengl3.h" />
+    <ClInclude Include="src\ImGui\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="src\ImGui\imgui_internal.h" />
+    <ClInclude Include="src\ImGui\implot.h" />
+    <ClInclude Include="src\ImGui\implot_internal.h" />
+    <ClInclude Include="src\ImGui\imstb_rectpack.h" />
+    <ClInclude Include="src\ImGui\imstb_textedit.h" />
+    <ClInclude Include="src\ImGui\imstb_truetype.h" />
+    <ClInclude Include="src\ImGui\stb_image.h" />
+    <ClInclude Include="src\ImGui\stb_implement.h" />
+    <ClInclude Include="src\tool_window\analysis_window.h" />
+    <ClInclude Include="src\tool_window\edge_window.h" />
+    <ClInclude Include="src\tool_window\element_window.h" />
+    <ClInclude Include="src\tool_window\node_window.h" />
+    <ClInclude Include="src\tool_window\options_window.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\dlls\freetype.dll" />
+    <None Include="resources\dlls\glew32.dll" />
+    <None Include="resources\dlls\glfw3.dll" />
+    <None Include="resources\shaders\constraint_frag_shader.frag" />
+    <None Include="resources\shaders\constraint_vert_shader.vert" />
+    <None Include="resources\shaders\load_frag_shader.frag" />
+    <None Include="resources\shaders\load_vert_shader.vert" />
+    <None Include="resources\shaders\point_frag_shader.frag" />
+    <None Include="resources\shaders\point_vert_shader.vert" />
+    <None Include="resources\shaders\ptmass_frag_shader.frag" />
+    <None Include="resources\shaders\ptmass_vert_shader.vert" />
+    <None Include="resources\shaders\text_frag_shader.frag" />
+    <None Include="resources\shaders\text_vert_shader.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="resources\fonts\CanadaDBNormal.ttf" />
+    <Font Include="resources\fonts\CenturyGothic.ttf" />
+    <Font Include="resources\fonts\FreeSans.ttf" />
+    <Font Include="resources\fonts\HyperFont.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\images\frame_supports.png" />
+    <Image Include="resources\images\innx_icon.png" />
+    <Image Include="resources\images\load_img.png" />
+    <Image Include="resources\images\pic_3D_circle.png" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
