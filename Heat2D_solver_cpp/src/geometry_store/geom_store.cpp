@@ -336,6 +336,13 @@ void geom_store::update_model_transperency(bool is_transparent)
 
 }
 
+void geom_store::paint_selection_rectangle(glm::vec2& o_pt, glm::vec2 c_pt)
+{
+
+
+}
+
+
 void geom_store::create_geometry(const nodes_list_store& model_nodes, const elementline_list_store& model_edgeelements,
 	const elementtri_list_store& model_trielements)
 {

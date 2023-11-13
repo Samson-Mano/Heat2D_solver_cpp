@@ -50,7 +50,7 @@ public:
 	void read_rawdata(std::ifstream& input_file);
 	void write_rawdata(std::ofstream& output_file);
 
-	// Functions to control the origin
+	// Functions to control the drawing area
 	void update_WindowDimension(const int& window_width, const int& window_height);
 	void update_model_matrix();
 	void update_model_zoomfit();
@@ -58,6 +58,8 @@ public:
 	void update_model_zoom(double& z_scale);
 	void update_model_transperency(bool is_transparent);
 
+	// Function to paint the selection rectangle
+	void paint_selection_rectangle(glm::vec2& o_pt,glm::vec2 c_pt);
 
 	// Functions to paint the geometry and results
 	void paint_geometry();

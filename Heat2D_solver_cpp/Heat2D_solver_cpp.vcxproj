@@ -168,6 +168,7 @@
     <ClCompile Include="src\geometry_store\geometry_buffers\VertexBufferLayout.cpp" />
     <ClCompile Include="src\geometry_store\geometry_objects\dynamic_line_list_store.cpp" />
     <ClCompile Include="src\geometry_store\geometry_objects\dynamic_point_list_store.cpp" />
+    <ClCompile Include="src\geometry_store\geometry_objects\dynamic_selrectangle_store.cpp" />
     <ClCompile Include="src\geometry_store\geometry_objects\label_list_store.cpp" />
     <ClCompile Include="src\geometry_store\geometry_objects\line_list_store.cpp" />
     <ClCompile Include="src\geometry_store\geometry_objects\point_list_store.cpp" />
@@ -216,6 +217,7 @@
     <ClInclude Include="src\geometry_store\geometry_buffers\VertexBufferLayout.h" />
     <ClInclude Include="src\geometry_store\geometry_objects\dynamic_line_list_store.h" />
     <ClInclude Include="src\geometry_store\geometry_objects\dynamic_point_list_store.h" />
+    <ClInclude Include="src\geometry_store\geometry_objects\dynamic_selrectangle_store.h" />
     <ClInclude Include="src\geometry_store\geometry_objects\label_list_store.h" />
     <ClInclude Include="src\geometry_store\geometry_objects\line_list_store.h" />
     <ClInclude Include="src\geometry_store\geometry_objects\point_list_store.h" />

@@ -33,7 +33,7 @@ void app_window::init()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
 	// Create a window
-	window = glfwCreateWindow(window_width, window_height, "1D String Vibration", nullptr, nullptr);
+	window = glfwCreateWindow(window_width, window_height, "2D Steady State Heat Conduction", nullptr, nullptr);
 
 	if (!window)
 	{

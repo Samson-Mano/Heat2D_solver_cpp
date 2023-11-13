@@ -83,11 +83,19 @@ void mouse_event_handler::handleMouseButton(int button, int action, int mods, do
 				glm::vec2 loc = glm::vec2(xpos, ypos);
 				// mouse_evnt.rotation_operation_start(loc);
 			}
+
+			if (isShiftDown == true)
+			{
+				// Shift Left drag start
+				glm::vec2 loc = glm::vec2(xpos, ypos);
+				mouse_evnt.select_operation_start(loc, false);
+			}
 		}
 		else if (action == GLFW_RELEASE)
 		{
 			// Left Mouse up
 			// mouse_evnt.rotation_operation_ends();
+			mouse_evnt.select_operation_ends();
 
 			// Calculate mouse move distance
 			double deltaX = xpos - last_pt.x;
@@ -139,11 +147,18 @@ void mouse_event_handler::handleMouseButton(int button, int action, int mods, do
 				glm::vec2 loc = glm::vec2(xpos, ypos);
 				mouse_evnt.pan_operation_start(loc);
 			}
+			if (isShiftDown == true)
+			{
+				// Shift Right drag start
+				glm::vec2 loc = glm::vec2(xpos, ypos);
+				mouse_evnt.select_operation_start(loc, true);
+			}
 		}
 		else if (action == GLFW_RELEASE)
 		{
 			// Right Mouse up
 			mouse_evnt.pan_operation_ends();
+			mouse_evnt.select_operation_ends();
 
 			// Calculate mouse move distance
 			double deltaX = xpos - last_pt.x;
@@ -194,6 +209,7 @@ void mouse_event_handler::handleMouseScroll(double xoffset, double yoffset, doub
 
 void mouse_event_handler::handleKeyDown(int key, int scancode, int action, int mods)
 {
+	// Ctrl Key
 	if (key == GLFW_KEY_LEFT_CONTROL || key == GLFW_KEY_RIGHT_CONTROL)
 	{
 		if (action == GLFW_PRESS)
@@ -203,6 +219,19 @@ void mouse_event_handler::handleKeyDown(int key, int scancode, int action, int m
 		else if (action == GLFW_RELEASE)
 		{
 			isCtrlDown = false;
+		}
+	}
+
+	// Shift Key
+	if (key == GLFW_KEY_LEFT_SHIFT || key == GLFW_KEY_RIGHT_SHIFT)
+	{
+		if (action == GLFW_PRESS)
+		{
+			isShiftDown = true;
+		}
+		else if (action == GLFW_RELEASE)
+		{
+			isShiftDown = false;
 		}
 	}
 

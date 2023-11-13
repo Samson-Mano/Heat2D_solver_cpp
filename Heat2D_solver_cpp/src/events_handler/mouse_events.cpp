@@ -36,6 +36,12 @@ void mouse_events::mouse_location(glm::vec2& loc)
 		glm::vec2 current_translataion = delta_d / (std::max((geom->geom_param.window_width), (geom->geom_param.window_height)) * 0.5f);
 		pan_operation(current_translataion);
 	}
+
+	// Select operation in progress
+	if (is_select == true)
+	{
+		select_operation(click_pt, loc);
+	}
 }
 
 void mouse_events::pan_operation_start(glm::vec2& loc)
@@ -61,6 +67,29 @@ void mouse_events::pan_operation_ends()
 	prev_translation = total_translation;
 	is_pan = false;
 	//std::cout << "Pan Operation End" << std::endl;
+}
+
+void mouse_events::select_operation_start(glm::vec2& loc, bool is_rightbutton_select)
+{
+	// Select operation start
+	is_select = true;
+	this->is_rightbutton_select = is_rightbutton_select;
+	// Note the click point when the pan operation start
+	click_pt = loc;
+}
+
+void mouse_events::select_operation(glm::vec2& click_loc,glm::vec2& current_loc)
+{
+	// Selection operation in progress
+
+
+}
+
+void mouse_events::select_operation_ends()
+{
+	// Selection operation completes
+
+	is_select = false;
 }
 
 void mouse_events::zoom_operation(double& e_delta, glm::vec2& loc)

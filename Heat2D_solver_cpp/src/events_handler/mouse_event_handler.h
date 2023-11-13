@@ -10,6 +10,7 @@ class mouse_event_handler
 {
 public:
 	bool isCtrlDown = false; // Flag to indicate if Ctrl key is currently pressed
+	bool isShiftDown = false; // Flag to indicate if Shift key is currently pressed
 	glm::vec2 last_pt = glm::vec2(0);
 	double lastClickTime = 0.0;
 	int lastButton = 0;
