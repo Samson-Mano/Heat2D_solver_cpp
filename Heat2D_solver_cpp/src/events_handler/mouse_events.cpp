@@ -69,11 +69,11 @@ void mouse_events::pan_operation_ends()
 	//std::cout << "Pan Operation End" << std::endl;
 }
 
-void mouse_events::select_operation_start(glm::vec2& loc, bool is_rightbutton_select)
+void mouse_events::select_operation_start(glm::vec2& loc, bool is_rightbutton)
 {
 	// Select operation start
 	is_select = true;
-	this->is_rightbutton_select = is_rightbutton_select;
+	this->is_rightbutton = is_rightbutton;
 	// Note the click point when the pan operation start
 	click_pt = loc;
 }
@@ -81,14 +81,16 @@ void mouse_events::select_operation_start(glm::vec2& loc, bool is_rightbutton_se
 void mouse_events::select_operation(glm::vec2& click_loc,glm::vec2& current_loc)
 {
 	// Selection operation in progress
-
-
+	bool is_paint = true;
+	geom->update_selection_rectangle(click_loc, current_loc,is_paint,is_select,is_rightbutton);
 }
 
-void mouse_events::select_operation_ends()
+void mouse_events::select_operation_ends(glm::vec2& current_loc)
 {
 	// Selection operation completes
+	bool is_paint = false;
 
+	geom->update_selection_rectangle(click_pt, current_loc, is_paint,is_select,is_rightbutton);
 	is_select = false;
 }
 

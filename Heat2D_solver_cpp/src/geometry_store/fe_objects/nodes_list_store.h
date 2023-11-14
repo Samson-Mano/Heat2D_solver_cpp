@@ -31,6 +31,7 @@ public:
 	void paint_label_node_ids();
 	void paint_label_node_coords();
 	int is_node_hit(glm::vec2& loc);
+	std::vector<int> is_node_selected(const glm::vec2& corner_pt1, const glm::vec2& corner_pt2);
 	void update_geometry_matrices(bool set_modelmatrix, bool set_pantranslation, bool set_zoomtranslation, bool set_transparency, bool set_deflscale);
 
 private:

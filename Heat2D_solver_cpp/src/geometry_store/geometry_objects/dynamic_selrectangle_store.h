@@ -10,15 +10,23 @@ public:
 	dynamic_selrectangle_store();
 	~dynamic_selrectangle_store();
 	void init(geom_parameters* geom_param_ptr);
-	void paint_selection_rectangle(const glm::vec2& o_pt,const glm::vec2& c_pt);
+	void update_selection_rectangle(const glm::vec2& o_pt, const glm::vec2& c_pt, const bool& is_paint);
+
+	void paint_selection_rectangle();
 
 private:
-	gBuffers dyn_line_buffer;
-	Shader dyn_line_shader;
+	bool is_paint = false;
+	glm::vec2 o_pt = glm::vec2(0);
+	glm::vec2 c_pt = glm::vec2(0);
 
-	glm::vec2 pt1 = glm::vec2(0);
-	glm::vec2 pt2 = glm::vec2(0);
-	glm::vec2 pt3 = glm::vec2(0);
-	glm::vec2 pt4 = glm::vec2(0);
+	gBuffers dyn_selrect_bndry_buffer;
+	gBuffers dyn_selrect_interior_buffer;
+	Shader dyn_selrect_shader;
+
+	void set_boundaryline_buffer();
+	void set_shadedtriangle_buffer();
+
+	void update_buffer();
+
 
 };

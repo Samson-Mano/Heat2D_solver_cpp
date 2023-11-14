@@ -36,6 +36,45 @@ void geom_parameters::init()
 }
 
 
+bool geom_parameters::isPointInsideRectangle(double point_x, double point_y,
+	double rect_cpt1_x, double rect_cpt1_y,
+	double rect_cpt2_x, double rect_cpt2_y)
+{
+	return (point_x >= std::min(rect_cpt1_x, rect_cpt2_x) &&
+		point_x <= std::max(rect_cpt1_x, rect_cpt2_x) &&
+		point_y >= std::min(rect_cpt1_y, rect_cpt2_y) &&
+		point_y <= std::max(rect_cpt1_y, rect_cpt2_y));
+}
+
+
+void geom_parameters::copyNodenumberlistToCharArray(const std::vector<int>& vec, char* charArray, size_t bufferSize)
+{
+	// Use std::ostringstream to build the comma-separated string
+	std::ostringstream oss;
+	for (size_t i = 0; i < vec.size(); ++i)
+	{
+		if (i > 0)
+		{
+			oss << ", "; // Add a comma and space for each element except the first one
+		}
+		oss << vec[i];
+	}
+
+	// Copy the resulting string to the char array
+	std::string resultString = oss.str();
+
+	if (resultString.size() + 1 > bufferSize)
+	{
+		// Truncate 15 character
+		resultString.erase(bufferSize - 16);
+		resultString += "..exceeds limit";
+	}
+
+	strncpy_s(charArray, bufferSize, resultString.c_str(), _TRUNCATE);
+
+}
+
+
 // Stop watch
 void Stopwatch::reset_time()
 {

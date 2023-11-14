@@ -80,6 +80,13 @@ public:
 	geom_parameters();
 	~geom_parameters();
 	void init();
+
+	static bool isPointInsideRectangle(double point_x, double point_y,
+		double rect_cpt1_x, double rect_cpt1_y,
+		double rect_cpt2_x, double rect_cpt2_y);
+
+	static void copyNodenumberlistToCharArray(const std::vector<int>& vec, char* charArray, size_t bufferSize);
+
 private:
 
 };

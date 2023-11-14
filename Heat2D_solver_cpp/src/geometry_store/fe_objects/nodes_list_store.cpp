@@ -133,6 +133,53 @@ int nodes_list_store::is_node_hit(glm::vec2& loc)
 	return -1;
 }
 
+std::vector<int> nodes_list_store::is_node_selected(const glm::vec2& corner_pt1, const glm::vec2& corner_pt2)
+{
+	// Return the node id of node which is inside the rectangle
+	// Covert mouse location to screen location
+	int max_dim = geom_param_ptr->window_width > geom_param_ptr->window_height ? geom_param_ptr->window_width : geom_param_ptr->window_height;
+
+	// Selected node list index;
+	std::vector<int> selected_node_index;
+
+	// Transform the mouse location to openGL screen coordinates
+	// Corner Point 1
+	double screen_cpt1_x = 2.0f * ((corner_pt1.x - (geom_param_ptr->window_width * 0.5f)) / max_dim);
+	double screen_cpt1_y = 2.0f * (((geom_param_ptr->window_height * 0.5f) - corner_pt1.y) / max_dim);
+
+	// Corner Point 2
+	double screen_cpt2_x = 2.0f * ((corner_pt2.x - (geom_param_ptr->window_width * 0.5f)) / max_dim);
+	double screen_cpt2_y = 2.0f * (((geom_param_ptr->window_height * 0.5f) - corner_pt2.y) / max_dim);
+
+	// Nodal location
+	glm::mat4 scaling_matrix = glm::mat4(1.0) * static_cast<float>(geom_param_ptr->zoom_scale);
+	scaling_matrix[3][3] = 1.0f;
+
+	glm::mat4 scaledModelMatrix = scaling_matrix * geom_param_ptr->modelMatrix;
+
+	// Loop through all nodes in map and update min and max values
+	for (auto it = nodeMap.begin(); it != nodeMap.end(); ++it)
+	{
+		const auto& node = it->second.node_pt;
+		glm::vec4 finalPosition = scaledModelMatrix * glm::vec4(node.x, node.y, 0, 1.0f) * geom_param_ptr->panTranslation;
+
+		double node_position_x = finalPosition.x;
+		double node_position_y = finalPosition.y;
+
+		// Check whether the point inside a rectangle
+		if (geom_param_ptr->isPointInsideRectangle(node_position_x, node_position_y,
+			screen_cpt1_x, screen_cpt1_y,
+			screen_cpt2_x, screen_cpt2_y))
+		{
+			selected_node_index.push_back(it->first);
+		}
+	}
+
+	// Return the node index find
+	return selected_node_index;
+}
+
+
 void nodes_list_store::update_geometry_matrices(bool set_modelmatrix, bool set_pantranslation, bool set_zoomtranslation, bool set_transparency, bool set_deflscale)
 {
 	// Update model openGL uniforms

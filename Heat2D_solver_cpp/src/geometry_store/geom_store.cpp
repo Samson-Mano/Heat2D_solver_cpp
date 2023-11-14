@@ -17,6 +17,9 @@ void geom_store::init(analysis_window* sol_window, options_window* op_window,
 	// Initialize the geometry parameters
 	geom_param.init();
 
+	// Intialize the selection rectangle
+	selection_rectangle.init(&geom_param);
+
 	is_geometry_set = false;
 	is_analysis_complete = false;
 
@@ -179,6 +182,7 @@ void geom_store::read_rawdata(std::ifstream& input_file)
 
 void geom_store::write_rawdata(std::ofstream& output_file)
 {
+
 }
 
 void geom_store::update_WindowDimension(const int& window_width, const int& window_height)
@@ -336,10 +340,26 @@ void geom_store::update_model_transperency(bool is_transparent)
 
 }
 
-void geom_store::paint_selection_rectangle(glm::vec2& o_pt, glm::vec2 c_pt)
+void geom_store::update_selection_rectangle(const glm::vec2& o_pt, const glm::vec2& c_pt,
+	const bool& is_paint, const bool& is_select, const bool& is_rightbutton)
 {
+	// Draw the selection rectangle
+	selection_rectangle.update_selection_rectangle(o_pt, c_pt,is_paint);
 
+	// Selection commence (mouse button release)
+	if (is_paint == false && is_select == true)
+	{
+		if (nd_window->is_show_window == true)
+		{
+			// Selected index
+			std::vector<int> selected_node_ids = model_nodes.is_node_selected(o_pt, c_pt);
+			nd_window->add_to_node_list(selected_node_ids, is_rightbutton);
 
+			// Node selection
+			std::cout << "Node selection in progress " << std::endl;
+		}
+		
+	}
 }
 
 
@@ -495,6 +515,7 @@ void geom_store::paint_geometry()
 
 	// Paint the results
 	paint_model_results();
+
 }
 
 void geom_store::paint_model()
@@ -532,19 +553,37 @@ void geom_store::paint_model()
 	if (nd_window->is_show_window == true)
 	{
 		// Node Window 
+		// Selection rectangle
+		selection_rectangle.paint_selection_rectangle();
 
+		// Apply the Node constraint
+		if (nd_window->apply_nodal_constraint == true)
+		{
 
+			nd_window->apply_nodal_constraint = false;
+		}
+
+		// Delete all the Node constraint
+		if (nd_window->delete_all_nodal_constraint == true)
+		{
+
+			nd_window->delete_all_nodal_constraint = false;
+		}
 	}
 
 	if (edg_window->is_show_window == true)
 	{
 		// Edge Window 
+		// Selection rectangle
+		selection_rectangle.paint_selection_rectangle();
 
 
 	}
 	if (elm_window->is_show_window == true)
 	{
 		// Element Window 
+			// Selection rectangle
+		selection_rectangle.paint_selection_rectangle();
 
 
 	}

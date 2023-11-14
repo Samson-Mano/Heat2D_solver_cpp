@@ -255,6 +255,8 @@
     <None Include="resources\shaders\point_vert_shader.vert" />
     <None Include="resources\shaders\ptmass_frag_shader.frag" />
     <None Include="resources\shaders\ptmass_vert_shader.vert" />
+    <None Include="resources\shaders\selrect_frag_shader.frag" />
+    <None Include="resources\shaders\selrect_vert_shader.vert" />
     <None Include="resources\shaders\text_frag_shader.frag" />
     <None Include="resources\shaders\text_vert_shader.vert" />
   </ItemGroup>

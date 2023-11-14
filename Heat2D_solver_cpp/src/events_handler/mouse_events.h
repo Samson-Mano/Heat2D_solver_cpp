@@ -18,7 +18,7 @@ public:
 	glm::vec2 prev_translation = glm::vec2(0);
 	glm::vec2 total_translation = glm::vec2(0);
 	bool is_pan = false;
-	bool is_rightbutton_select = false;
+	bool is_rightbutton = false;
 	bool is_select = false;
 	double zoom_val = 1.0;
 
@@ -34,8 +34,8 @@ public:
 	void pan_operation_ends();
 	
 	// Select operation (Selection rectangle draw)
-	void select_operation_start(glm::vec2& loc, bool is_rightbutton_select);
-	void select_operation_ends();
+	void select_operation_start(glm::vec2& loc, bool is_rightbutton);
+	void select_operation_ends(glm::vec2& current_loc);
 
 	void zoom_operation(double& e_delta, glm::vec2& loc);
 	void zoom_to_fit();

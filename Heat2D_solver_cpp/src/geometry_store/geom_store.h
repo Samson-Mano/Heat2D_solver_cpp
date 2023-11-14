@@ -25,6 +25,9 @@
 #include "fe_objects/nodeload_list_store.h"
 #include "fe_objects/nodeinlcond_list_store.h"
 
+// Geometry Objects
+#include "geometry_objects/dynamic_selrectangle_store.h"
+
 // FE Result Objects Wave analysis
 #include "analysis_result_objects/wave_analysis_result_store.h";
 #include "analysis_result_objects/wave_elementline_list_store.h";
@@ -59,12 +62,13 @@ public:
 	void update_model_transperency(bool is_transparent);
 
 	// Function to paint the selection rectangle
-	void paint_selection_rectangle(glm::vec2& o_pt,glm::vec2 c_pt);
+	void update_selection_rectangle(const glm::vec2& o_pt, const glm::vec2& c_pt,
+		const bool& is_paint, const bool& is_select, const bool& is_rightbutton);
 
 	// Functions to paint the geometry and results
 	void paint_geometry();
 private:
-
+	dynamic_selrectangle_store selection_rectangle;
 
 	// Geometry objects
 	nodes_list_store model_nodes;

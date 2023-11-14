@@ -95,7 +95,6 @@ void mouse_event_handler::handleMouseButton(int button, int action, int mods, do
 		{
 			// Left Mouse up
 			// mouse_evnt.rotation_operation_ends();
-			mouse_evnt.select_operation_ends();
 
 			// Calculate mouse move distance
 			double deltaX = xpos - last_pt.x;
@@ -103,6 +102,9 @@ void mouse_event_handler::handleMouseButton(int button, int action, int mods, do
 
 			// Update last position
 			last_pt = glm::vec2(xpos, ypos);
+
+			// Selection operation ends
+			mouse_evnt.select_operation_ends(last_pt);
 
 			// Check if it's a click or drag
 			if (deltaX == 0.0 && deltaY == 0.0 && (currentTime - lastClickTime) < 0.5 && lastButton == GLFW_MOUSE_BUTTON_LEFT)
@@ -158,13 +160,15 @@ void mouse_event_handler::handleMouseButton(int button, int action, int mods, do
 		{
 			// Right Mouse up
 			mouse_evnt.pan_operation_ends();
-			mouse_evnt.select_operation_ends();
 
 			// Calculate mouse move distance
 			double deltaX = xpos - last_pt.x;
 			double deltaY = ypos - last_pt.y;
 			// Update last position
 			last_pt = glm::vec2(xpos, ypos);
+
+			// Selection operation ends
+			mouse_evnt.select_operation_ends(last_pt);
 
 			// Check if it's a click or drag
 			if (deltaX == 0.0 && deltaY == 0.0 && (currentTime - lastClickTime) < 0.5 && lastButton == GLFW_MOUSE_BUTTON_RIGHT)
@@ -190,7 +194,7 @@ void mouse_event_handler::handleMouseButton(int button, int action, int mods, do
 void mouse_event_handler::handleMouseMove(double xpos, double ypos)
 {
 	// Mouse move operation
-	if (isCtrlDown == true)
+	if (isCtrlDown == true || isShiftDown == true)
 	{
 		glm::vec2 loc = glm::vec2(xpos, ypos);
 		mouse_evnt.mouse_location(loc);
