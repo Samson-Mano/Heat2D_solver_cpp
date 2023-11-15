@@ -17,6 +17,7 @@ void elementline_list_store::init(geom_parameters* geom_param_ptr)
 
 	// Set the geometry parameters for the labels (and clear the labels)
 	element_lines.init(geom_param_ptr);
+	selected_element_lines.init(geom_param_ptr);
 
 	// Clear the lines
 	elementline_count = 0;
@@ -39,12 +40,12 @@ void elementline_list_store::add_elementline(int& line_id, node_store* startNode
 	}
 
 	// Check whether the startNode and endNode already exists (regardless of order)
-	for (const auto& line : elementlineMap) 
+	for (const auto& line : elementlineMap)
 	{
 		const elementline_store& existing_line = line.second;
 
 		if ((existing_line.startNode->node_id == startNode->node_id && existing_line.endNode->node_id == endNode->node_id) ||
-			(existing_line.startNode->node_id == endNode->node_id && existing_line.endNode->node_id == startNode->node_id)) 
+			(existing_line.startNode->node_id == endNode->node_id && existing_line.endNode->node_id == startNode->node_id))
 		{
 			// Line with the same start and end nodes already exists (do not add)
 			return;
@@ -66,6 +67,25 @@ void elementline_list_store::add_elementline(int& line_id, node_store* startNode
 
 }
 
+void elementline_list_store::add_selection_lines(const std::vector<int>& selected_edge_ids)
+{
+	// Clear the existing selected lines
+	selected_element_lines.clear_lines();
+
+	// Add to Selected Edges
+	glm::vec3 temp_color = geom_param_ptr->geom_colors.node_selected_color;
+
+	for (const auto& it : selected_edge_ids)
+	{
+		selected_element_lines.add_line(elementlineMap[it].line_id, elementlineMap[it].startNode->node_pt, elementlineMap[it].endNode->node_pt,
+			glm::vec2(0),glm::vec2(0), temp_color, temp_color, false);
+	}
+
+	// Set the selected element lines buffer
+	selected_element_lines.set_buffer();
+}
+
+
 void elementline_list_store::set_buffer()
 {
 	// Set the buffers for the Model
@@ -77,6 +97,13 @@ void elementline_list_store::paint_elementlines()
 	// Paint the model lines
 	element_lines.paint_lines();
 }
+
+void elementline_list_store::paint_selected_elementlines()
+{
+	//Paint the selected model lines
+	selected_element_lines.paint_lines();
+}
+
 
 int elementline_list_store::is_line_hit(glm::vec2& loc)
 {
@@ -101,7 +128,7 @@ int elementline_list_store::is_line_hit(glm::vec2& loc)
 		elementline_store elementline = it->second;
 
 		glm::vec2 s_node = elementline.startNode->node_pt;
-	 	glm::vec2 e_node = elementline.endNode->node_pt;
+		glm::vec2 e_node = elementline.endNode->node_pt;
 
 		glm::vec4 s_node_finalPosition = scaledModelMatrix * glm::vec4(s_node.x, s_node.y, 0, 1.0f) * geom_param_ptr->panTranslation;
 		glm::vec4 e_node_finalPosition = scaledModelMatrix * glm::vec4(e_node.x, e_node.y, 0, 1.0f) * geom_param_ptr->panTranslation;
@@ -121,6 +148,62 @@ int elementline_list_store::is_line_hit(glm::vec2& loc)
 
 	return -1;
 }
+
+std::vector<int> elementline_list_store::is_edge_selected(const glm::vec2& corner_pt1, const glm::vec2& corner_pt2)
+{
+	// Return the node id of node which is inside the rectangle
+	// Covert mouse location to screen location
+	int max_dim = geom_param_ptr->window_width > geom_param_ptr->window_height ? geom_param_ptr->window_width : geom_param_ptr->window_height;
+
+	// Selected node list index;
+	std::vector<int> selected_edge_index;
+
+	// Transform the mouse location to openGL screen coordinates
+	// Corner Point 1
+	glm::vec2 screen_cpt1 = glm::vec2(2.0f * ((corner_pt1.x - (geom_param_ptr->window_width * 0.5f)) / max_dim),
+		2.0f * (((geom_param_ptr->window_height * 0.5f) - corner_pt1.y) / max_dim));
+
+	// Corner Point 2
+	glm::vec2 screen_cpt2 = glm::vec2(2.0f * ((corner_pt2.x - (geom_param_ptr->window_width * 0.5f)) / max_dim),
+		2.0f * (((geom_param_ptr->window_height * 0.5f) - corner_pt2.y) / max_dim));
+
+	// Nodal location
+	glm::mat4 scaling_matrix = glm::mat4(1.0) * static_cast<float>(geom_param_ptr->zoom_scale);
+	scaling_matrix[3][3] = 1.0f;
+
+	glm::mat4 scaledModelMatrix = scaling_matrix * geom_param_ptr->modelMatrix;
+
+	// Loop through all edges in map
+	for (auto it = elementlineMap.begin(); it != elementlineMap.end(); ++it)
+	{
+		const glm::vec2& start_pt = it->second.startNode->node_pt;
+		const glm::vec2& end_pt = it->second.endNode->node_pt;
+		glm::vec2 pt_025 = geom_param_ptr->linear_interpolation(start_pt, end_pt, 0.25);
+		glm::vec2 pt_050 = geom_param_ptr->linear_interpolation(start_pt, end_pt, 0.50);
+		glm::vec2 pt_075 = geom_param_ptr->linear_interpolation(start_pt, end_pt, 0.75);
+
+		glm::vec4 start_pt_fp = scaledModelMatrix * glm::vec4(start_pt.x, start_pt.y, 0, 1.0f) * geom_param_ptr->panTranslation;
+		glm::vec4 end_pt_fp = scaledModelMatrix * glm::vec4(end_pt.x, end_pt.y, 0, 1.0f) * geom_param_ptr->panTranslation;
+		glm::vec4 pt_025_fp = scaledModelMatrix * glm::vec4(pt_025.x, pt_025.y, 0, 1.0f) * geom_param_ptr->panTranslation;
+		glm::vec4 pt_050_fp = scaledModelMatrix * glm::vec4(pt_050.x, pt_050.y, 0, 1.0f) * geom_param_ptr->panTranslation;
+		glm::vec4 pt_075_fp = scaledModelMatrix * glm::vec4(pt_075.x, pt_075.y, 0, 1.0f) * geom_param_ptr->panTranslation;
+
+		// Check whether the point inside a rectangle
+		if (geom_param_ptr->isPointInsideRectangle(screen_cpt1, screen_cpt2, start_pt_fp) == true || 
+			geom_param_ptr->isPointInsideRectangle(screen_cpt1, screen_cpt2, end_pt_fp) == true || 
+			geom_param_ptr->isPointInsideRectangle(screen_cpt1, screen_cpt2, pt_025_fp) == true ||
+			geom_param_ptr->isPointInsideRectangle(screen_cpt1, screen_cpt2, pt_050_fp) == true ||
+			geom_param_ptr->isPointInsideRectangle(screen_cpt1, screen_cpt2, pt_075_fp) == true)
+		{
+			selected_edge_index.push_back(it->first);
+		}
+	}
+
+	// Return the edge index find
+	return selected_edge_index;
+
+}
+
 
 bool elementline_list_store::isClickPointOnLine(const glm::vec2& clickPoint, const glm::vec2& lineStart, const glm::vec2& lineEnd, float threshold)
 {
@@ -154,4 +237,5 @@ void elementline_list_store::update_geometry_matrices(bool set_modelmatrix, bool
 {
 	// Update model openGL uniforms
 	element_lines.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_zoomtranslation, set_transparency, set_deflscale);
+	selected_element_lines.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_zoomtranslation, set_transparency, set_deflscale);
 }

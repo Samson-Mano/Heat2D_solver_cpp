@@ -11,6 +11,7 @@ public:
 	node_window* nd_window = nullptr;
 	edge_window* edg_window = nullptr;
 	element_window* elm_window = nullptr;
+	element_prop_window* elm_prop_window = nullptr;
 
 
 	glm::vec2 click_pt = glm::vec2(0);
@@ -25,7 +26,7 @@ public:
 	mouse_events();
 	~mouse_events();
 	void init(geom_store* geom, analysis_window* sol_window, options_window* op_window,
-		node_window* nd_window, edge_window* edg_window, element_window* elm_window);
+		node_window* nd_window, edge_window* edg_window, element_window* elm_window, element_prop_window* elm_prop_window);
 
 	void mouse_location(glm::vec2& loc);
 

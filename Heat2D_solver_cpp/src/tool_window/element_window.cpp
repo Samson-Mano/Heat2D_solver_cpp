@@ -93,37 +93,6 @@ void element_window::render_window()
 		ImGui::InputText("##AmbientTemperature", ambienttemperatureValue, sizeof(ambienttemperatureValue), ImGuiInputTextFlags_CharsDecimal);
 	}
 
-	ImGui::Spacing();
-	// Element properties
-	if (ImGui::CollapsingHeader("Element Properties", ImGuiTreeNodeFlags_DefaultOpen))
-	{
-				ImGui::Text("Thermal conductivity kx =");
-
-		ImGui::SetNextItemWidth(160.0f);
-		ImGui::SameLine();
-		static char thermalKx[256] = ""; // Buffer to store the input value
-		ImGui::InputText("##ThermalConductivityKx", thermalKx, sizeof(thermalKx), ImGuiInputTextFlags_CharsDecimal);
-
-		//______________________________________________________
-
-		ImGui::Text("Thermal conductivity ky =");
-
-		ImGui::SetNextItemWidth(160.0f);
-		ImGui::SameLine();
-		static char thermalKy[256] = ""; // Buffer to store the input value
-		ImGui::InputText("##ThermalConductivityKy", thermalKy, sizeof(thermalKy), ImGuiInputTextFlags_CharsDecimal);
-
-		//______________________________________________________
-
-		ImGui::Text("Element thickness t =");
-
-		ImGui::SetNextItemWidth(160.0f);
-		ImGui::SameLine();
-		static char elementthickness[256] = ""; // Buffer to store the input value
-		ImGui::InputText("##ElementThickness", elementthickness, sizeof(elementthickness), ImGuiInputTextFlags_CharsDecimal);
-
-	}
-
 	//__________________________________________________________________________________________
 	// Selected Element list
 	ImGui::Spacing();
@@ -161,6 +130,8 @@ void element_window::render_window()
 	{
 		// Clear the selected elements
 		this->selected_elements.clear();
+		is_selected_count = false; // Number of selected elements 0
+		is_selection_changed = false; // Set the selection changed
 
 		apply_element_constraint = false;
 		delete_all_element_constraint = false;
@@ -191,7 +162,11 @@ void element_window::add_to_element_list(const std::vector<int>& selected_elemen
 			// Check whether elements are already in the list or not
 			if (std::find(this->selected_elements.begin(), this->selected_elements.end(), elmnt) == this->selected_elements.end())
 			{
+				// Add to selected elements
 				this->selected_elements.push_back(elmnt);
+
+				// Selection changed flag
+				this->is_selection_changed = true;
 			}
 		}
 	}
@@ -203,7 +178,17 @@ void element_window::add_to_element_list(const std::vector<int>& selected_elemen
 			// Erase the elements which is found in the list
 			this->selected_elements.erase(std::remove(this->selected_elements.begin(), this->selected_elements.end(), elmnt),
 				this->selected_elements.end());
+
+			// Selection changed flag
+			this->is_selection_changed = true;
 		}
 
+	}
+
+	// Number of selected elements
+	this->is_selected_count = false;
+	if (static_cast<int>(this->selected_elements.size()) > 0)
+	{
+		this->is_selected_count = true;
 	}
 }

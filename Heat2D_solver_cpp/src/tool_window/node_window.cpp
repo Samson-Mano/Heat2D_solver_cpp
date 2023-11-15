@@ -103,6 +103,8 @@ void node_window::render_window()
 	{
 		// Clear the selected nodes
 		this->selected_nodes.clear();
+		is_selected_count = false; // Number of selected nodes 0
+		is_selection_changed = false; // Set the selection changed
 
 		apply_nodal_constraint = false;
 		delete_all_nodal_constraint = false;
@@ -132,7 +134,11 @@ void node_window::add_to_node_list(const std::vector<int>& selected_nodes, const
 			// Check whether nodes are already in the list or not
 			if (std::find(this->selected_nodes.begin(), this->selected_nodes.end(), node) == this->selected_nodes.end())
 			{
+				// Add to selected nodes
 				this->selected_nodes.push_back(node);
+
+				// Selection changed flag
+				this->is_selection_changed = true;
 			}
 		}
 	}
@@ -144,35 +150,19 @@ void node_window::add_to_node_list(const std::vector<int>& selected_nodes, const
 			// Erase the node which is found in the list
 			this->selected_nodes.erase(std::remove(this->selected_nodes.begin(), this->selected_nodes.end(), node),
 				this->selected_nodes.end());
+
+			// Selection changed flag
+			this->is_selection_changed = true;
 		}
 
 	}
+
+	// Number of selected nodes
+	this->is_selected_count = false;
+	if (static_cast<int>(this->selected_nodes.size()) > 0)
+	{
+		this->is_selected_count = true;
+	}
+
 }
 
-//
-//void node_window::copyNodenumberlistToCharArray(const std::vector<int>& vec, char* charArray, size_t bufferSize)
-//{
-//	// Use std::ostringstream to build the comma-separated string
-//	std::ostringstream oss;
-//	for (size_t i = 0; i < vec.size(); ++i) 
-//	{
-//		if (i > 0) 
-//		{
-//			oss << ", "; // Add a comma and space for each element except the first one
-//		}
-//		oss << vec[i];
-//	}
-//
-//	// Copy the resulting string to the char array
-//	std::string resultString = oss.str();
-//
-//	if (resultString.size() + 1 > bufferSize)
-//	{
-//		// Truncate 15 character
-//		resultString.erase(bufferSize - 16);
-//		resultString += "..exceeds limit";
-//	}
-//
-//	strncpy_s(charArray, bufferSize, resultString.c_str(), _TRUNCATE);
-//
-//}

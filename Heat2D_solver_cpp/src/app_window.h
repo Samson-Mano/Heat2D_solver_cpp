@@ -21,7 +21,7 @@
 #include "tool_window/element_window.h"
 #include "tool_window/analysis_window.h"
 #include "tool_window/options_window.h"
-
+#include "tool_window/element_prop_window.h"
 
 class app_window
 {
@@ -48,7 +48,7 @@ public:
 	element_window elm_window;
 	options_window op_window;
 	analysis_window sol_window;
-
+	element_prop_window elm_prop_window;
 
 	app_window();
 	~app_window();

@@ -22,11 +22,15 @@ public:
 	~elementtri_list_store();
 	void init(geom_parameters* geom_param_ptr);
 	void add_elementtriangle(int& tri_id, node_store* nd1, node_store* nd2, node_store* nd3);
+	void add_selection_triangles(const std::vector<int>& selected_element_ids);
 	void set_buffer();
 	void paint_elementtriangles();
+	void paint_selected_elementtriangles();
+
 	void paint_elementtriangles_shrunk();
 	void paint_elementtriangles_boundarylines();
 	void paint_elementtriangles_boundarypts();
+	std::vector<int> is_tri_selected(const glm::vec2& corner_pt1, const glm::vec2& corner_pt2);
 
 	void update_geometry_matrices(bool set_modelmatrix, bool set_pantranslation, bool set_zoomtranslation, bool set_transparency, bool set_deflscale);
 
@@ -36,6 +40,7 @@ private:
 	point_list_store element_boundarypts;
 	tri_list_store element_tris;
 	tri_list_store element_tris_shrunk;
+	tri_list_store selected_element_tris_shrunk;
 
 	// Add triangle boundary lines
 	void addtriangle_boundarylines(const glm::vec2& nd_pt1, const glm::vec2& nd_pt2, const glm::vec2& nd_pt3);

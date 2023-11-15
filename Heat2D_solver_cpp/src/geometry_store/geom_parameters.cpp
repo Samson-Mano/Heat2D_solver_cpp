@@ -22,6 +22,8 @@ void geom_parameters::init()
 	// Initialize the color theme
 	geom_colors.background_color = glm::vec3(0.62f, 0.62f, 0.62f);
 	geom_colors.node_color = glm::vec3(0.0f, 0.0f, 0.4f);
+	geom_colors.node_selected_color = glm::vec3(0.8039f, 0.3608f, 0.3608f);
+
 	geom_colors.line_color = glm::vec3(0.0f, 0.2f, 0.6f);
 	geom_colors.constraint_color = glm::vec3(0.6f, 0.0f, 0.6f);
 	geom_colors.load_color = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -36,16 +38,20 @@ void geom_parameters::init()
 }
 
 
-bool geom_parameters::isPointInsideRectangle(double point_x, double point_y,
-	double rect_cpt1_x, double rect_cpt1_y,
-	double rect_cpt2_x, double rect_cpt2_y)
+bool geom_parameters::isPointInsideRectangle(const glm::vec2& rect_cpt1, const glm::vec2& rect_cpt2, const glm::vec2& pt)
 {
-	return (point_x >= std::min(rect_cpt1_x, rect_cpt2_x) &&
-		point_x <= std::max(rect_cpt1_x, rect_cpt2_x) &&
-		point_y >= std::min(rect_cpt1_y, rect_cpt2_y) &&
-		point_y <= std::max(rect_cpt1_y, rect_cpt2_y));
+	return (pt.x >= std::min(rect_cpt1.x, rect_cpt2.x) &&
+		pt.x <= std::max(rect_cpt1.x, rect_cpt2.x) &&
+		pt.y >= std::min(rect_cpt1.y, rect_cpt2.y) &&
+		pt.y <= std::max(rect_cpt1.y, rect_cpt2.y));
 }
 
+glm::vec2 geom_parameters::linear_interpolation(const glm::vec2& pt1, const glm::vec2& pt2, const double& param_t)
+{
+	return glm::vec2(pt1.x * (1.0 - param_t) + (pt2.x * param_t),
+					 pt1.y * (1.0 - param_t) + (pt2.y * param_t));
+
+}
 
 void geom_parameters::copyNodenumberlistToCharArray(const std::vector<int>& vec, char* charArray, size_t bufferSize)
 {
@@ -73,6 +79,28 @@ void geom_parameters::copyNodenumberlistToCharArray(const std::vector<int>& vec,
 	strncpy_s(charArray, bufferSize, resultString.c_str(), _TRUNCATE);
 
 }
+
+
+glm::vec3 geom_parameters::get_standard_color(int color_index)
+{
+	// Red, Green, Blue, Yellow, Magenta, Cyan, Orange, Purple, Lime, Pink
+	static const std::vector<glm::vec3> colorSet = {
+			glm::vec3(1.0f, 0.0f, 0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f),
+			glm::vec3(0.0f, 0.0f, 1.0f),
+			glm::vec3(1.0f, 1.0f, 0.0f),
+			glm::vec3(1.0f, 0.0f, 1.0f),
+			glm::vec3(0.0f, 1.0f, 1.0f),
+			glm::vec3(1.0f, 0.5f, 0.0f),
+			glm::vec3(0.5f, 0.0f, 1.0f),
+			glm::vec3(0.5f, 1.0f, 0.0f),
+			glm::vec3(1.0f, 0.0f, 0.5f)
+	};
+
+	int index = color_index % colorSet.size();
+	return colorSet[index];
+}
+
 
 
 // Stop watch

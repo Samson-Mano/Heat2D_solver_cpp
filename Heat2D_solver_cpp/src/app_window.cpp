@@ -73,16 +73,17 @@ void app_window::init()
 	elm_window.init(); // Element window
 	op_window.init(); // Option window
 	sol_window.init(); // Analysis solver window
+	elm_prop_window.init(); // Element properties window
 
 	geom.update_WindowDimension(window_width, window_height);
 	// Initialize the geometry (initialize only after model window is initialized)
-	geom.init(&sol_window, &op_window, &nd_window,&edg_window, &elm_window);
+	geom.init(&sol_window, &op_window, &nd_window,&edg_window, &elm_window,&elm_prop_window);
 
 	// Set the mouse button callback function with the user pointer pointing to the mouseHandler object
 	glfwSetWindowUserPointer(window, &mouse_Handler);
 
 	// Passing the address of geom and window dimensions to mouse handler
-	mouse_Handler.init(&geom, &sol_window, &op_window, &nd_window, &edg_window ,&elm_window);
+	mouse_Handler.init(&geom, &sol_window, &op_window, &nd_window, &edg_window ,&elm_window,&elm_prop_window);
 
 	// Pass the address of options window, material window, solver window
 	// geom.add_window_ptr(&op_window, &mat_window, &fe_window);
@@ -228,21 +229,27 @@ void app_window::menu_events()
 		// Pre-Processing menu item
 		if (ImGui::BeginMenu("Pre-Processing"))
 		{
-			if (ImGui::MenuItem("Nodal Properties"))
+			if (ImGui::MenuItem("Nodal Constraints"))
 			{
-				// Nodal Properties
+				// Nodal Constraints
 				nd_window.is_show_window = true;
 			}
-			if (ImGui::MenuItem("Edge Properties"))
+			if (ImGui::MenuItem("Edge Constraints"))
 			{
-				// Edge Properties
+				// Edge Constraints
 				edg_window.is_show_window = true;
+			}
+			if (ImGui::MenuItem("Element Constraints"))
+			{
+				// Element Constraints
+				elm_window.is_show_window = true;
 			}
 			if (ImGui::MenuItem("Element Properties"))
 			{
 				// Element Properties
-				elm_window.is_show_window = true;
+				elm_prop_window.is_show_window = true;
 			}
+
 			ImGui::EndMenu();
 		}
 		// Solve
@@ -264,6 +271,7 @@ void app_window::menu_events()
 	nd_window.render_window(); // Node window
 	edg_window.render_window(); // Edge window
 	elm_window.render_window(); // Element window
+	elm_prop_window.render_window(); // Element Properties window
 	op_window.render_window(); // Option window
 	sol_window.render_window(); // Solver window
 

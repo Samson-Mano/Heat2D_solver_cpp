@@ -11,17 +11,18 @@ mouse_events::~mouse_events()
 }
 
 void mouse_events::init(geom_store* geom, analysis_window* sol_window, options_window* op_window,
-	node_window* nd_window, edge_window* edg_window, element_window* elm_window)
+	node_window* nd_window, edge_window* edg_window, element_window* elm_window, element_prop_window* elm_prop_window)
 {
 	// Intialize the geometry and tool window pointers
 	this->geom = geom;
 
 	// Tool windows
-	this->sol_window = sol_window;
-	this->op_window = op_window;
-	this->nd_window = nd_window;
-	this->edg_window = edg_window;
-	this->elm_window = elm_window;
+	this->sol_window = sol_window; // solver window
+	this->op_window = op_window; // option window
+	this->nd_window = nd_window; // node constraint window
+	this->edg_window = edg_window; // edge constraint window
+	this->elm_window = elm_window; // element constraint window
+	this->elm_prop_window = elm_prop_window; // element properties window
 }
 
 void mouse_events::mouse_location(glm::vec2& loc)

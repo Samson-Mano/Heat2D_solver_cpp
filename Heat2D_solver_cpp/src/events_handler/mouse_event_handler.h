@@ -21,7 +21,7 @@ public:
 	~mouse_event_handler();
 
 	void init(geom_store* geom, analysis_window* sol_window, options_window* op_window,
-		node_window* nd_window, edge_window* edg_window, element_window* elm_window);
+		node_window* nd_window, edge_window* edg_window, element_window* elm_window, element_prop_window* elm_prop_window);
 	// Mouse button callback function
 	static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 	// Mouse move callback function

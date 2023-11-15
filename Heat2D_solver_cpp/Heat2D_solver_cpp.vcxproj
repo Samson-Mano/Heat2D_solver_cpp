@@ -186,6 +186,7 @@
     <ClCompile Include="src\ImGui\stb_implement.cpp" />
     <ClCompile Include="src\tool_window\analysis_window.cpp" />
     <ClCompile Include="src\tool_window\edge_window.cpp" />
+    <ClCompile Include="src\tool_window\element_prop_window.cpp" />
     <ClCompile Include="src\tool_window\element_window.cpp" />
     <ClCompile Include="src\tool_window\node_window.cpp" />
     <ClCompile Include="src\tool_window\options_window.cpp" />
@@ -239,6 +240,7 @@
     <ClInclude Include="src\ImGui\stb_implement.h" />
     <ClInclude Include="src\tool_window\analysis_window.h" />
     <ClInclude Include="src\tool_window\edge_window.h" />
+    <ClInclude Include="src\tool_window\element_prop_window.h" />
     <ClInclude Include="src\tool_window\element_window.h" />
     <ClInclude Include="src\tool_window\node_window.h" />
     <ClInclude Include="src\tool_window\options_window.h" />

@@ -17,6 +17,8 @@ void nodes_list_store::init(geom_parameters* geom_param_ptr)
 
 	// Set the geometry parameters for the labels (and clear the labels)
 	node_points.init(geom_param_ptr);
+	selected_node_points.init(geom_param_ptr);
+
 	node_id_labels.init(geom_param_ptr);
 	node_coord_labels.init(geom_param_ptr);
 
@@ -68,6 +70,22 @@ void nodes_list_store::add_node(int& node_id, glm::vec2& node_pt)
 	node_coord_labels.add_text(temp_str, node_pt, glm::vec2(0), temp_color, 0.0f, false, false);
 }
 
+void nodes_list_store::add_selection_nodes(const std::vector<int>& selected_node_ids)
+{
+	// Add to Selected Nodes
+	selected_node_points.clear_points();
+
+	glm::vec3 temp_color = geom_param_ptr->geom_colors.node_selected_color;
+	glm::vec2 node_pt_offset = glm::vec2(0);
+
+	for (const auto& it : selected_node_ids)
+	{
+		selected_node_points.add_point(nodeMap[it].node_id, nodeMap[it].node_pt, node_pt_offset, temp_color, false);
+	}
+
+	selected_node_points.set_buffer();
+}
+
 void nodes_list_store::set_buffer()
 {
 	// Set the buffers for the Model
@@ -81,6 +99,12 @@ void nodes_list_store::paint_model_nodes()
 {
 	// Paint the model nodes
 	node_points.paint_points();
+}
+
+void nodes_list_store::paint_selected_model_nodes()
+{
+	// Paint the model nodes
+	selected_node_points.paint_points();
 }
 
 void nodes_list_store::paint_label_node_ids()
@@ -144,12 +168,12 @@ std::vector<int> nodes_list_store::is_node_selected(const glm::vec2& corner_pt1,
 
 	// Transform the mouse location to openGL screen coordinates
 	// Corner Point 1
-	double screen_cpt1_x = 2.0f * ((corner_pt1.x - (geom_param_ptr->window_width * 0.5f)) / max_dim);
-	double screen_cpt1_y = 2.0f * (((geom_param_ptr->window_height * 0.5f) - corner_pt1.y) / max_dim);
+	glm::vec2 screen_cpt1 = glm::vec2(2.0f * ((corner_pt1.x - (geom_param_ptr->window_width * 0.5f)) / max_dim),
+		2.0f * (((geom_param_ptr->window_height * 0.5f) - corner_pt1.y) / max_dim));
 
 	// Corner Point 2
-	double screen_cpt2_x = 2.0f * ((corner_pt2.x - (geom_param_ptr->window_width * 0.5f)) / max_dim);
-	double screen_cpt2_y = 2.0f * (((geom_param_ptr->window_height * 0.5f) - corner_pt2.y) / max_dim);
+	glm::vec2 screen_cpt2 = glm::vec2(2.0f * ((corner_pt2.x - (geom_param_ptr->window_width * 0.5f)) / max_dim),
+		2.0f * (((geom_param_ptr->window_height * 0.5f) - corner_pt2.y) / max_dim));
 
 	// Nodal location
 	glm::mat4 scaling_matrix = glm::mat4(1.0) * static_cast<float>(geom_param_ptr->zoom_scale);
@@ -157,7 +181,7 @@ std::vector<int> nodes_list_store::is_node_selected(const glm::vec2& corner_pt1,
 
 	glm::mat4 scaledModelMatrix = scaling_matrix * geom_param_ptr->modelMatrix;
 
-	// Loop through all nodes in map and update min and max values
+	// Loop through all nodes in map
 	for (auto it = nodeMap.begin(); it != nodeMap.end(); ++it)
 	{
 		const auto& node = it->second.node_pt;
@@ -167,9 +191,7 @@ std::vector<int> nodes_list_store::is_node_selected(const glm::vec2& corner_pt1,
 		double node_position_y = finalPosition.y;
 
 		// Check whether the point inside a rectangle
-		if (geom_param_ptr->isPointInsideRectangle(node_position_x, node_position_y,
-			screen_cpt1_x, screen_cpt1_y,
-			screen_cpt2_x, screen_cpt2_y))
+		if (geom_param_ptr->isPointInsideRectangle(screen_cpt1, screen_cpt2, finalPosition) == true)
 		{
 			selected_node_index.push_back(it->first);
 		}
@@ -184,6 +206,7 @@ void nodes_list_store::update_geometry_matrices(bool set_modelmatrix, bool set_p
 {
 	// Update model openGL uniforms
 	node_points.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_zoomtranslation, set_transparency, set_deflscale);
+	selected_node_points.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_zoomtranslation, set_transparency, set_deflscale);
 	node_id_labels.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_zoomtranslation, set_transparency, set_deflscale);
 	node_coord_labels.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_zoomtranslation, set_transparency, set_deflscale);
 }

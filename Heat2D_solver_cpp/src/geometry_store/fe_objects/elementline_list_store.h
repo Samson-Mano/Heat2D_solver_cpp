@@ -20,13 +20,18 @@ public:
 	~elementline_list_store();
 	void init(geom_parameters* geom_param_ptr);
 	void add_elementline(int& line_id, node_store* startNode, node_store* endNode);
+	void add_selection_lines(const std::vector<int>& selected_edge_ids);
 	void set_buffer();
 	void paint_elementlines();
+	void paint_selected_elementlines();
+
 	int is_line_hit(glm::vec2& loc);
+	std::vector<int> is_edge_selected(const glm::vec2& corner_pt1, const glm::vec2& corner_pt2);
 	bool isClickPointOnLine(const glm::vec2& clickPoint, const glm::vec2& lineStart, const glm::vec2& lineEnd, float threshold);
 	void update_geometry_matrices(bool set_modelmatrix, bool set_pantranslation, bool set_zoomtranslation, bool set_transparency, bool set_deflscale);
 
 private:
 	geom_parameters* geom_param_ptr = nullptr;
 	line_list_store element_lines;
+	line_list_store selected_element_lines;
 };

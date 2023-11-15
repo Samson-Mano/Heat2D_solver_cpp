@@ -93,8 +93,6 @@ void edge_window::render_window()
 		ImGui::InputText("##AmbientTemperature", ambienttemperatureValue, sizeof(ambienttemperatureValue), ImGuiInputTextFlags_CharsDecimal);
 	}
 
-
-
 	//__________________________________________________________________________________________
 	// Selected edge list
 	ImGui::Spacing();
@@ -132,6 +130,8 @@ void edge_window::render_window()
 	{
 		// Clear the selected edges
 		this->selected_edges.clear();
+		is_selected_count = false; // Number of selected edges 0
+		is_selection_changed = false; // Set the selection changed
 
 		apply_edge_constraint = false;
 		delete_all_edge_constraint = false;
@@ -160,7 +160,11 @@ void edge_window::add_to_edge_list(const std::vector<int>& selected_edges, const
 			// Check whether edges are already in the list or not
 			if (std::find(this->selected_edges.begin(), this->selected_edges.end(), edge) == this->selected_edges.end())
 			{
+				// Add to selected edges
 				this->selected_edges.push_back(edge);
+
+				// Selection changed flag
+				this->is_selection_changed = true;
 			}
 		}
 	}
@@ -172,7 +176,18 @@ void edge_window::add_to_edge_list(const std::vector<int>& selected_edges, const
 			// Erase the edges which is found in the list
 			this->selected_edges.erase(std::remove(this->selected_edges.begin(), this->selected_edges.end(), edge),
 				this->selected_edges.end());
+
+			// Selection changed flag
+			this->is_selection_changed = true;
 		}
 
 	}
+
+	// Number of selected edges
+	this->is_selected_count = false;
+	if (static_cast<int>(this->selected_edges.size()) > 0)
+	{
+		this->is_selected_count = true;
+	}
+
 }

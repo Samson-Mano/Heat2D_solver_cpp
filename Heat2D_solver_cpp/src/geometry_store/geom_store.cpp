@@ -11,7 +11,7 @@ geom_store::~geom_store()
 }
 
 void geom_store::init(analysis_window* sol_window, options_window* op_window,
-	node_window* nd_window, edge_window* edg_window, element_window* elm_window)
+	node_window* nd_window, edge_window* edg_window, element_window* elm_window, element_prop_window* elm_prop_window)
 {
 	// Initialize
 	// Initialize the geometry parameters
@@ -29,6 +29,7 @@ void geom_store::init(analysis_window* sol_window, options_window* op_window,
 	this->nd_window = nd_window; // Node window
 	this->edg_window = edg_window; // Edge window
 	this->elm_window = elm_window; // Element window
+	this->elm_prop_window = elm_prop_window; // Element property window
 }
 
 void geom_store::fini()
@@ -82,7 +83,7 @@ void geom_store::read_rawdata(std::ifstream& input_file)
 			// Nodes
 			while (j < lines.size())
 			{
-				std::istringstream nodeIss(lines[j+1]);
+				std::istringstream nodeIss(lines[j + 1]);
 
 				// Vector to store the split values
 				std::vector<std::string> splitValues;
@@ -116,7 +117,7 @@ void geom_store::read_rawdata(std::ifstream& input_file)
 			// Triangle Element
 			while (j < lines.size())
 			{
-				std::istringstream elementIss(lines[j+1]);
+				std::istringstream elementIss(lines[j + 1]);
 
 				// Vector to store the split values
 				std::vector<std::string> splitValues;
@@ -344,21 +345,45 @@ void geom_store::update_selection_rectangle(const glm::vec2& o_pt, const glm::ve
 	const bool& is_paint, const bool& is_select, const bool& is_rightbutton)
 {
 	// Draw the selection rectangle
-	selection_rectangle.update_selection_rectangle(o_pt, c_pt,is_paint);
+	selection_rectangle.update_selection_rectangle(o_pt, c_pt, is_paint);
 
 	// Selection commence (mouse button release)
 	if (is_paint == false && is_select == true)
 	{
+		// Node Constraint Window
 		if (nd_window->is_show_window == true)
 		{
-			// Selected index
+			// Selected Node index
 			std::vector<int> selected_node_ids = model_nodes.is_node_selected(o_pt, c_pt);
 			nd_window->add_to_node_list(selected_node_ids, is_rightbutton);
-
-			// Node selection
-			std::cout << "Node selection in progress " << std::endl;
 		}
-		
+
+		// Edge Constraint Window
+		if (edg_window->is_show_window == true)
+		{
+			// Selected Edge Index
+			std::vector<int> selected_edge_ids = model_edgeelements.is_edge_selected(o_pt, c_pt);
+			edg_window->add_to_edge_list(selected_edge_ids, is_rightbutton);
+
+		}
+
+		// Element Constraint Window
+		if (elm_window->is_show_window == true)
+		{
+			// Selected Element Index
+			std::vector<int> selected_elm_ids = model_trielements.is_tri_selected(o_pt, c_pt);
+			elm_window->add_to_element_list(selected_elm_ids, is_rightbutton);
+
+		}
+
+		// Element Properties Window
+		if (elm_prop_window->is_show_window == true)
+		{
+			// Selected Element Index
+			std::vector<int> selected_elm_ids = model_trielements.is_tri_selected(o_pt, c_pt);
+			elm_prop_window->add_to_element_list(selected_elm_ids, is_rightbutton);
+
+		}
 	}
 }
 
@@ -421,6 +446,17 @@ void geom_store::create_geometry(const nodes_list_store& model_nodes, const elem
 			&this->model_nodes.nodeMap[temp_tri.nd2->node_id], &this->model_nodes.nodeMap[temp_tri.nd3->node_id]);
 	}
 
+	// Create the default material
+	material_data inpt_material;
+	inpt_material.material_id = 0; // Get the material id
+	inpt_material.material_name = "Default material"; //Default material name
+	inpt_material.thermal_conductivity_kx = 100; // W/m degC
+	inpt_material.thermal_conductivity_ky = 100; //  W/m degC
+	inpt_material.element_thickness = 0.2; // cm
+
+	// Add to materail list
+	elm_prop_window->material_list.clear();
+	elm_prop_window->material_list[inpt_material.material_id] = inpt_material;
 
 	// Geometry is loaded
 	is_geometry_set = true;
@@ -526,7 +562,6 @@ void geom_store::paint_model()
 	model_edgeelements.paint_elementlines();
 	model_nodes.paint_model_nodes();
 
-
 	model_constarints.paint_constraints();
 	model_loads.paint_loads();
 
@@ -556,6 +591,19 @@ void geom_store::paint_model()
 		// Selection rectangle
 		selection_rectangle.paint_selection_rectangle();
 
+		// Paint the selected nodes
+		if (nd_window->is_selected_count == true)
+		{
+			model_nodes.paint_selected_model_nodes();
+		}
+
+		// Check whether the selection changed
+		if (nd_window->is_selection_changed == true)
+		{
+			model_nodes.add_selection_nodes(nd_window->selected_nodes);
+			nd_window->is_selection_changed = false;
+		}
+
 		// Apply the Node constraint
 		if (nd_window->apply_nodal_constraint == true)
 		{
@@ -577,17 +625,93 @@ void geom_store::paint_model()
 		// Selection rectangle
 		selection_rectangle.paint_selection_rectangle();
 
+		// Paint the selected edges
+		if (edg_window->is_selected_count == true)
+		{
+			model_edgeelements.paint_selected_elementlines();
+		}
 
+		// Check whether the selection changed
+		if (edg_window->is_selection_changed == true)
+		{
+			model_edgeelements.add_selection_lines(edg_window->selected_edges);
+			edg_window->is_selection_changed = false;
+		}
+
+		// Apply the Edge constraint
+		if (edg_window->apply_edge_constraint == true)
+		{
+
+			edg_window->apply_edge_constraint = false;
+		}
+
+		// Delete all the Edge constraint
+		if (edg_window->delete_all_edge_constraint == true)
+		{
+
+			edg_window->delete_all_edge_constraint = false;
+		}
 	}
 	if (elm_window->is_show_window == true)
 	{
 		// Element Window 
+		// Selection rectangle
+		selection_rectangle.paint_selection_rectangle();
+
+		// Paint the selected elements
+		if (elm_window->is_selected_count == true)
+		{
+			model_trielements.paint_selected_elementtriangles();
+		}
+
+		// Check whether the selection changed
+		if (elm_window->is_selection_changed == true)
+		{
+			model_trielements.add_selection_triangles(elm_window->selected_elements);
+			elm_window->is_selection_changed = false;
+		}
+
+		// Apply the Element constraint
+		if (elm_window->apply_element_constraint == true)
+		{
+
+			elm_window->apply_element_constraint = false;
+		}
+
+		// Delete all the Element constraint
+		if (elm_window->delete_all_element_constraint == true)
+		{
+
+			elm_window->delete_all_element_constraint = false;
+		}
+	}
+	if (elm_prop_window->is_show_window == true)
+	{
+		// Element Properties Window 
 			// Selection rectangle
 		selection_rectangle.paint_selection_rectangle();
 
+		// Paint the selected elements
+		if (elm_prop_window->is_selected_count == true)
+		{
+			model_trielements.paint_selected_elementtriangles();
+		}
+
+		// Check whether the selection changed
+		if (elm_prop_window->is_selection_changed == true)
+		{
+			model_trielements.add_selection_triangles(elm_prop_window->selected_elements);
+			elm_prop_window->is_selection_changed = false;
+		}
+
+		// Apply the Element properties
+		if (elm_prop_window->apply_element_properties == true)
+		{
+
+			elm_prop_window->apply_element_properties = false;
+		}
 
 	}
-
 
 }
 

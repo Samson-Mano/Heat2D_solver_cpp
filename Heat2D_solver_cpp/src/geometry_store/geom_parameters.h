@@ -10,6 +10,7 @@ struct geom_color_theme
 {
 	glm::vec3 background_color = glm::vec3(0);
 	glm::vec3 node_color = glm::vec3(0);
+	glm::vec3 node_selected_color = glm::vec3(0);
 	glm::vec3 line_color = glm::vec3(0);
 	glm::vec3 constraint_color = glm::vec3(0);
 	glm::vec3 load_color = glm::vec3(0);
@@ -81,12 +82,13 @@ public:
 	~geom_parameters();
 	void init();
 
-	static bool isPointInsideRectangle(double point_x, double point_y,
-		double rect_cpt1_x, double rect_cpt1_y,
-		double rect_cpt2_x, double rect_cpt2_y);
+	static bool isPointInsideRectangle(const glm::vec2& rect_cpt1, const glm::vec2& rect_cpt2, const glm::vec2& pt);
 
 	static void copyNodenumberlistToCharArray(const std::vector<int>& vec, char* charArray, size_t bufferSize);
 
+	static glm::vec3 get_standard_color(int color_index);
+
+	static glm::vec2 linear_interpolation(const glm::vec2& pt1, const glm::vec2& pt2, const double& param_t);
 private:
 
 };

@@ -9,6 +9,8 @@ class edge_window
 {
 public:
 	bool is_show_window = false;
+	bool is_selection_changed = false;
+	bool is_selected_count = false;
 	bool apply_edge_constraint = false;
 	bool delete_all_edge_constraint = false;
 	int selected_constraint_option = 0; // type of constraint option (Edge heat source or Edge specified temperature or Edge Apply convection)

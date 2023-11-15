@@ -12,6 +12,7 @@
 #include "../tool_window/edge_window.h"
 #include "../tool_window/element_window.h"
 #include "../tool_window/options_window.h"
+#include "../tool_window/element_prop_window.h"
 
 // Solver
 #include "../fe_solver/analysis_solver.h"
@@ -46,7 +47,7 @@ public:
 	~geom_store();
 
 	void init(analysis_window* sol_window, options_window* op_window,
-		node_window* nd_window, edge_window* edg_window , element_window* elm_window);
+		node_window* nd_window, edge_window* edg_window , element_window* elm_window, element_prop_window* elm_prop_window);
 	void fini();
 
 	// Reading and writing the geometry file
@@ -94,6 +95,7 @@ private:
 	node_window* nd_window = nullptr;
 	edge_window* edg_window = nullptr;
 	element_window* elm_window = nullptr;
+	element_prop_window* elm_prop_window = nullptr;
 
 	// Create geometry
 	void create_geometry(const nodes_list_store& model_nodes, const elementline_list_store& model_edgeelements,
