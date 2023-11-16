@@ -9,6 +9,7 @@ struct elementtri_store
 	node_store* nd1 = nullptr; // node 1
 	node_store* nd2 = nullptr; // node 2
 	node_store* nd3 = nullptr; // node 2
+	int material_id = 0;
 };
 
 
@@ -23,9 +24,13 @@ public:
 	void init(geom_parameters* geom_param_ptr);
 	void add_elementtriangle(int& tri_id, node_store* nd1, node_store* nd2, node_store* nd3);
 	void add_selection_triangles(const std::vector<int>& selected_element_ids);
+	void update_material(const std::vector<int> selected_element_tri, const int& material_id);
+	void execute_delete_material(const int& del_material_id);
+
 	void set_buffer();
 	void paint_elementtriangles();
 	void paint_selected_elementtriangles();
+	void paint_tri_material_id();
 
 	void paint_elementtriangles_shrunk();
 	void paint_elementtriangles_boundarylines();
@@ -36,11 +41,15 @@ public:
 
 private:
 	geom_parameters* geom_param_ptr = nullptr;
+	label_list_store element_materialid;
 	line_list_store element_boundarylines;
 	point_list_store element_boundarypts;
 	tri_list_store element_tris;
 	tri_list_store element_tris_shrunk;
 	tri_list_store selected_element_tris_shrunk;
+
+	//Update material Id
+	void update_material_id_labels();
 
 	// Add triangle boundary lines
 	void addtriangle_boundarylines(const glm::vec2& nd_pt1, const glm::vec2& nd_pt2, const glm::vec2& nd_pt3);

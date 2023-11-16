@@ -16,8 +16,9 @@ void elementtri_list_store::init(geom_parameters* geom_param_ptr)
 	this->geom_param_ptr = geom_param_ptr;
 
 	// Set the geometry parameters for the labels (and clear the labels)
-	element_tris.init(geom_param_ptr);
+		element_tris.init(geom_param_ptr);
 	element_tris_shrunk.init(geom_param_ptr);
+	element_materialid.init(geom_param_ptr);
 	selected_element_tris_shrunk.init(geom_param_ptr);
 	element_boundarylines.init(geom_param_ptr);
 	element_boundarypts.init(geom_param_ptr);
@@ -120,6 +121,44 @@ void elementtri_list_store::add_selection_triangles(const std::vector<int>& sele
 
 }
 
+void elementtri_list_store::update_material(const std::vector<int> selected_element_tri,const int& material_id)
+{
+	// Update the material ID
+	for (const int& it : selected_element_tri)
+	{
+		elementtriMap[it].material_id = material_id;
+	}
+
+	// Update the material ID label
+	update_material_id_labels();
+}
+
+
+void elementtri_list_store::execute_delete_material(const int& del_material_id)
+{
+	// Update delete material
+	bool is_del_material_found = false; // Flag to check whether material id deleted
+
+	// Delete the material
+	for (const auto& tri : elementtriMap)
+	{
+		int id = tri.first; // get the id
+		if (elementtriMap[id].material_id == del_material_id)
+		{
+			// Delete material is removed and the material ID of that element to 0
+			elementtriMap[id].material_id = 0;
+			is_del_material_found = true;
+		}
+	}
+
+	// Update the material ID label
+	if (is_del_material_found == true)
+	{
+		update_material_id_labels();
+	}
+
+}
+
 void elementtri_list_store::set_buffer()
 {
 	// Set the buffers for the Model
@@ -127,6 +166,39 @@ void elementtri_list_store::set_buffer()
 	element_tris_shrunk.set_buffer();
 	element_boundarylines.set_buffer();
 	element_boundarypts.set_buffer();
+	update_material_id_labels();
+}
+
+void elementtri_list_store::update_material_id_labels()
+{
+	// Clear the labels
+	element_materialid.clear_labels();
+
+	// Update the material id labels
+	glm::vec3 temp_color;
+	std::string temp_str = "";
+
+	for (auto it = elementtriMap.begin(); it != elementtriMap.end(); ++it)
+	{
+		elementtri_store elementtri = it->second;
+
+		// Get the triangle node points
+		glm::vec2 nd_pt1 = elementtri.nd1->node_pt;
+		glm::vec2 nd_pt2 = elementtri.nd2->node_pt;
+		glm::vec2 nd_pt3 = elementtri.nd3->node_pt;
+
+		// Calculate the midpoint of the triangle
+		glm::vec2 tri_mid_pt = glm::vec2((nd_pt1.x + nd_pt2.x + nd_pt3.x) * 0.33333f, 
+										  (nd_pt1.y + nd_pt2.y + nd_pt3.y) * 0.33333f);
+
+		// Add the material ID
+		temp_color = geom_parameters::get_standard_color(elementtri.material_id);
+		temp_str = " M = " + std::to_string(elementtri.material_id);
+		element_materialid.add_text(temp_str, tri_mid_pt, glm::vec2(0), temp_color, 0, true, false);
+	}
+
+	// Set the buffer for the labels
+	element_materialid.set_buffer();
 }
 
 void elementtri_list_store::paint_elementtriangles()
@@ -145,6 +217,12 @@ void elementtri_list_store::paint_elementtriangles_shrunk()
 {
 	// Paint the triangles shrunk
 	element_tris_shrunk.paint_triangles();
+}
+
+void elementtri_list_store::paint_tri_material_id()
+{
+	// Paint the element material ID
+	element_materialid.paint_text();
 }
 
 void elementtri_list_store::paint_elementtriangles_boundarylines()
@@ -226,6 +304,7 @@ void elementtri_list_store::update_geometry_matrices(bool set_modelmatrix, bool 
 	// Update model openGL uniforms
 	element_tris.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_zoomtranslation, set_transparency, set_deflscale);
 	element_tris_shrunk.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_zoomtranslation, set_transparency, set_deflscale);
+	element_materialid.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_zoomtranslation, set_transparency, set_deflscale);
 	selected_element_tris_shrunk.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_zoomtranslation, set_transparency, set_deflscale);
 	element_boundarylines.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_zoomtranslation, set_transparency, set_deflscale);
 	element_boundarypts.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_zoomtranslation, set_transparency, set_deflscale);

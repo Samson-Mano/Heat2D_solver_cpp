@@ -102,6 +102,20 @@ glm::vec3 geom_parameters::get_standard_color(int color_index)
 }
 
 
+glm::vec2 geom_parameters::findGeometricCenter(const std::vector<glm::vec2>& all_pts)
+{
+	// Function returns the geometric center of the nodes
+		// Initialize the sum with zero
+	glm::vec2 sum(0);
+
+	// Sum the points
+	for (auto it = all_pts.begin(); it != all_pts.end(); ++it)
+	{
+		sum += it;
+	}
+	return sum / static_cast<float>(all_pts.size());
+}
+
 
 // Stop watch
 void Stopwatch::reset_time()

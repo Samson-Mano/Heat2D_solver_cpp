@@ -227,11 +227,7 @@ void geom_store::update_model_matrix()
 	model_nodes.update_geometry_matrices(true, false, false, false, false);
 	model_edgeelements.update_geometry_matrices(true, false, false, false, false);
 	model_trielements.update_geometry_matrices(true, false, false, false, false);
-
-	model_constarints.update_geometry_matrices(true, false, false, false, false);
-	model_loads.update_geometry_matrices(true, false, false, false, false);
-	node_inldispl.update_geometry_matrices(true, false, false, false, false);
-	node_inlvelo.update_geometry_matrices(true, false, false, false, false);
+	model_constraints.update_geometry_matrices(true, false, false, false, false);
 
 	// Update the modal analysis result matrix
 	wave_result_lineelements.update_geometry_matrices(true, false, false, false, false);
@@ -253,11 +249,7 @@ void geom_store::update_model_zoomfit()
 	model_nodes.update_geometry_matrices(false, true, true, false, false);
 	model_edgeelements.update_geometry_matrices(false, true, true, false, false);
 	model_trielements.update_geometry_matrices(false, true, true, false, false);
-
-	model_constarints.update_geometry_matrices(false, true, true, false, false);
-	model_loads.update_geometry_matrices(false, true, true, false, false);
-	node_inldispl.update_geometry_matrices(false, true, true, false, false);
-	node_inlvelo.update_geometry_matrices(false, true, true, false, false);
+	model_constraints.update_geometry_matrices(false, true, true, false, false);
 
 	// Update the modal analysis result matrix
 	wave_result_lineelements.update_geometry_matrices(false, true, true, false, false);
@@ -279,11 +271,7 @@ void geom_store::update_model_pan(glm::vec2& transl)
 	model_nodes.update_geometry_matrices(false, true, false, false, false);
 	model_edgeelements.update_geometry_matrices(false, true, false, false, false);
 	model_trielements.update_geometry_matrices(false, true, false, false, false);
-
-	model_constarints.update_geometry_matrices(false, true, false, false, false);
-	model_loads.update_geometry_matrices(false, true, false, false, false);
-	node_inldispl.update_geometry_matrices(false, true, false, false, false);
-	node_inlvelo.update_geometry_matrices(false, true, false, false, false);
+	model_constraints.update_geometry_matrices(false, true, false, false, false);
 
 	// Update the modal analysis result matrix
 	wave_result_lineelements.update_geometry_matrices(false, true, false, false, false);
@@ -302,11 +290,7 @@ void geom_store::update_model_zoom(double& z_scale)
 	model_nodes.update_geometry_matrices(false, false, true, false, false);
 	model_edgeelements.update_geometry_matrices(false, false, true, false, false);
 	model_trielements.update_geometry_matrices(false, false, true, false, false);
-
-	model_constarints.update_geometry_matrices(false, false, true, false, false);
-	model_loads.update_geometry_matrices(false, false, true, false, false);
-	node_inldispl.update_geometry_matrices(false, false, true, false, false);
-	node_inlvelo.update_geometry_matrices(false, false, true, false, false);
+	model_constraints.update_geometry_matrices(false, false, true, false, false);
 
 	// Update the modal analysis result matrix
 	wave_result_lineelements.update_geometry_matrices(false, false, true, false, false);
@@ -333,12 +317,7 @@ void geom_store::update_model_transperency(bool is_transparent)
 	model_nodes.update_geometry_matrices(false, false, false, true, false);
 	model_edgeelements.update_geometry_matrices(false, false, false, true, false);
 	model_trielements.update_geometry_matrices(false, false, false, true, false);
-
-	model_constarints.update_geometry_matrices(false, false, false, true, false);
-	model_loads.update_geometry_matrices(false, false, false, true, false);
-	node_inldispl.update_geometry_matrices(false, false, false, true, false);
-	node_inlvelo.update_geometry_matrices(false, false, false, true, false);
-
+	model_constraints.update_geometry_matrices(false, false, false, true, false);
 }
 
 void geom_store::update_selection_rectangle(const glm::vec2& o_pt, const glm::vec2& c_pt,
@@ -399,11 +378,7 @@ void geom_store::create_geometry(const nodes_list_store& model_nodes, const elem
 	this->model_nodes.init(&geom_param);
 	this->model_edgeelements.init(&geom_param);
 	this->model_trielements.init(&geom_param);
-
-	this->model_constarints.init(&geom_param);
-	this->model_loads.init(&geom_param);
-	this->node_inldispl.init(&geom_param);
-	this->node_inlvelo.init(&geom_param);
+	this->model_constraints.init(&geom_param);
 
 	// Initialize the result store
 	this->wave_response_result.clear_results();
@@ -412,6 +387,8 @@ void geom_store::create_geometry(const nodes_list_store& model_nodes, const elem
 
 	//_______________________________________________________________________________
 	// Add to the model nodes
+	std::vector<glm::vec2> node_pts_list; // variable to find geometric center and geometric boundary
+
 	for (auto& nd : model_nodes.nodeMap)
 	{
 		// create a temporary node
@@ -420,6 +397,9 @@ void geom_store::create_geometry(const nodes_list_store& model_nodes, const elem
 
 		// Add to the node list
 		this->model_nodes.add_node(temp_node.node_id, temp_node.node_pt);
+
+		// Add to node point list to calculate the geometric center and geometric boundary
+		node_pts_list.push_back(temp_node.node_pt);
 	}
 
 	// Add to the model edges
@@ -468,7 +448,7 @@ void geom_store::create_geometry(const nodes_list_store& model_nodes, const elem
 	this->geom_param.geom_bound = geom_param.max_b - geom_param.min_b;
 
 	// Set the center of the geometry
-	this->geom_param.center = findGeometricCenter(model_nodes.nodeMap);
+	this->geom_param.center = geom_parameters::findGeometricCenter(node_pts_list);
 
 	// Set the geometry
 	update_model_matrix();
@@ -478,11 +458,6 @@ void geom_store::create_geometry(const nodes_list_store& model_nodes, const elem
 	this->model_nodes.set_buffer();
 	this->model_edgeelements.set_buffer();
 	this->model_trielements.set_buffer();
-
-	this->model_constarints.set_buffer();
-	this->model_loads.set_buffer();
-	this->node_inldispl.set_buffer();
-	this->node_inlvelo.set_buffer();
 
 	// Set the result object buffers
 	this->wave_result_nodes.set_buffer();
@@ -523,20 +498,21 @@ std::pair<glm::vec2, glm::vec2> geom_store::findMinMaxXY(const std::unordered_ma
 	return { minXY, maxXY };
 }
 
-glm::vec2 geom_store::findGeometricCenter(const std::unordered_map<int, node_store>& model_nodes)
-{
-	// Function returns the geometric center of the nodes
-		// Initialize the sum with zero
-	glm::vec2 sum(0);
-
-	// Sum the points
-	for (auto it = model_nodes.begin(); it != model_nodes.end(); ++it)
-	{
-		sum += it->second.node_pt;
-	}
-	return sum / static_cast<float>(model_nodes.size());
-}
-
+//
+//glm::vec2 geom_store::findGeometricCenter(const std::unordered_map<int, node_store>& model_nodes)
+//{
+//	// Function returns the geometric center of the nodes
+//		// Initialize the sum with zero
+//	glm::vec2 sum(0);
+//
+//	// Sum the points
+//	for (auto it = model_nodes.begin(); it != model_nodes.end(); ++it)
+//	{
+//		sum += it->second.node_pt;
+//	}
+//	return sum / static_cast<float>(model_nodes.size());
+//}
+//
 
 void geom_store::paint_geometry()
 {
@@ -562,27 +538,10 @@ void geom_store::paint_model()
 	model_edgeelements.paint_elementlines();
 	model_nodes.paint_model_nodes();
 
-	model_constarints.paint_constraints();
-	model_loads.paint_loads();
-
 	if (op_window->is_show_inlcond == true)
 	{
-		// Show the initial condition displacement
-		node_inldispl.paint_inlcond();
-		node_inlvelo.paint_inlcond();
-	}
-
-	if (op_window->is_show_inlcond_label == true)
-	{
-		// Show the initial condition displacement label
-		node_inldispl.paint_inlcond_label();
-		node_inlvelo.paint_inlcond_label();
-	}
-
-	if (op_window->is_show_loadvalue == true)
-	{
-		// Show the load value
-		model_loads.paint_load_labels();
+		// Show the model constraints
+		model_constraints.paint_constraints();
 	}
 
 	if (nd_window->is_show_window == true)
@@ -607,14 +566,28 @@ void geom_store::paint_model()
 		// Apply the Node constraint
 		if (nd_window->apply_nodal_constraint == true)
 		{
+			int constraint_type = nd_window->selected_constraint_option; // selected constraint type
+			std::vector<int> id_list;
+			std::vector<glm::vec2> cnst_pts;
 
+			for (const int& id : nd_window->selected_nodes)
+			{
+				// Point Id
+				id_list.push_back(id);
+
+				// Constraint point list
+				cnst_pts.push_back(model_nodes.nodeMap[id].node_pt);
+			}
+
+
+			model_constraints.add_constraints(0, constraint_type,id_list,cnst_pts)
 			nd_window->apply_nodal_constraint = false;
 		}
 
 		// Delete all the Node constraint
 		if (nd_window->delete_all_nodal_constraint == true)
 		{
-
+			model_constraints.delete_constraints(0); // Delete constraint Type 0
 			nd_window->delete_all_nodal_constraint = false;
 		}
 	}
@@ -648,7 +621,7 @@ void geom_store::paint_model()
 		// Delete all the Edge constraint
 		if (edg_window->delete_all_edge_constraint == true)
 		{
-
+			model_constraints.delete_constraints(1); // Delete constraint Type 1
 			edg_window->delete_all_edge_constraint = false;
 		}
 	}
@@ -681,7 +654,7 @@ void geom_store::paint_model()
 		// Delete all the Element constraint
 		if (elm_window->delete_all_element_constraint == true)
 		{
-
+			model_constraints.delete_constraints(2); // Delete constraint Type 2
 			elm_window->delete_all_element_constraint = false;
 		}
 	}
@@ -691,7 +664,7 @@ void geom_store::paint_model()
 			// Selection rectangle
 		selection_rectangle.paint_selection_rectangle();
 
-		// Paint the selected elements
+				// Paint the selected elements
 		if (elm_prop_window->is_selected_count == true)
 		{
 			model_trielements.paint_selected_elementtriangles();
@@ -704,13 +677,34 @@ void geom_store::paint_model()
 			elm_prop_window->is_selection_changed = false;
 		}
 
+		// Material deleted
+		if (elm_prop_window->execute_delete_materialid != -1)
+		{
+			// Delete material
+			// Execute delete material id
+			model_trielements.execute_delete_material(elm_prop_window->execute_delete_materialid);
+			elm_prop_window->execute_delete_materialid = -1;
+
+			// Remove the selection
+			elm_prop_window->selected_elements.clear();
+			elm_prop_window->is_selection_changed = true;
+		}
+
 		// Apply the Element properties
 		if (elm_prop_window->apply_element_properties == true)
 		{
-
+			// Apply material properties to the selected triangle elements
+			int material_id = elm_prop_window->material_list[elm_prop_window->selected_material_option].material_id; // get the material id
+			model_trielements.update_material(elm_prop_window->selected_elements, material_id);
 			elm_prop_window->apply_element_properties = false;
+
+			// Remove the selection
+			elm_prop_window->selected_elements.clear();
+			elm_prop_window->is_selection_changed = true;
 		}
 
+		// Paint the material ID
+		model_trielements.paint_tri_material_id();
 	}
 
 }

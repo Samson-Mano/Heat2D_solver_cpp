@@ -89,6 +89,8 @@ public:
 	static glm::vec3 get_standard_color(int color_index);
 
 	static glm::vec2 linear_interpolation(const glm::vec2& pt1, const glm::vec2& pt2, const double& param_t);
+
+	static	glm::vec2 findGeometricCenter(const std::vector<glm::vec2>& all_pts);
 private:
 
 };

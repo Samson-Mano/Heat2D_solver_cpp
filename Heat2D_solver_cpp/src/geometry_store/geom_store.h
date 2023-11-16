@@ -16,15 +16,11 @@
 
 // Solver
 #include "../fe_solver/analysis_solver.h"
-#include "../fe_solver/wave_vm_solver.h"
 
 // FE Objects
 #include "fe_objects/nodes_list_store.h"
 #include "fe_objects/elementline_list_store.h"
 #include "fe_objects/elementtri_list_store.h"
-#include "fe_objects/nodeconstraint_list_store.h"
-#include "fe_objects/nodeload_list_store.h"
-#include "fe_objects/nodeinlcond_list_store.h"
 
 // Geometry Objects
 #include "geometry_objects/dynamic_selrectangle_store.h"
@@ -76,10 +72,7 @@ private:
 	elementline_list_store model_edgeelements;
 	elementtri_list_store model_trielements;
 
-	nodeconstraint_list_store model_constarints;
-	nodeload_list_store model_loads;
-	nodeinlcond_list_store node_inldispl;
-	nodeinlcond_list_store node_inlvelo;
+	// Constraints
 
 	// Wave analysis result 
 	wave_analysis_result_store wave_response_result;
@@ -102,7 +95,7 @@ private:
 		const elementtri_list_store& model_trielements);
 
 	std::pair<glm::vec2, glm::vec2> findMinMaxXY(const std::unordered_map<int, node_store>& model_nodes);
-	glm::vec2 findGeometricCenter(const std::unordered_map<int, node_store>& model_nodes);
+	// glm::vec2 findGeometricCenter(const std::unordered_map<int, node_store>& model_nodes);
 
 
 	void paint_model(); // Paint the model

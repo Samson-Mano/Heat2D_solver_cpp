@@ -36,9 +36,6 @@
     <ClCompile Include="src\fe_solver\analysis_solver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\fe_solver\wave_vm_solver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\geometry_store\geom_parameters.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -88,15 +85,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\geometry_store\fe_objects\elementline_list_store.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\geometry_store\fe_objects\nodeconstraint_list_store.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\geometry_store\fe_objects\nodeinlcond_list_store.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\geometry_store\fe_objects\nodeload_list_store.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\geometry_store\fe_objects\nodes_list_store.cpp">
@@ -162,6 +150,9 @@
     <ClCompile Include="src\tool_window\element_prop_window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\geometry_store\fe_objects\constraints_list_store.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\app_window.h">
@@ -180,9 +171,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\fe_solver\analysis_solver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\fe_solver\wave_vm_solver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\geometry_store\geom_parameters.h">
@@ -234,15 +222,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\geometry_store\fe_objects\elementline_list_store.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\geometry_store\fe_objects\nodeconstraint_list_store.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\geometry_store\fe_objects\nodeinlcond_list_store.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\geometry_store\fe_objects\nodeload_list_store.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\geometry_store\fe_objects\nodes_list_store.h">
@@ -318,6 +297,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\tool_window\element_prop_window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\geometry_store\fe_objects\constraints_list_store.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
