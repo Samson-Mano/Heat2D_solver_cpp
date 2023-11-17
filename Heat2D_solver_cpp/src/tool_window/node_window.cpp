@@ -43,7 +43,9 @@ void node_window::render_window()
 	ImGui::Text("Selected Option: %s", (selected_constraint_option == 0) ? "Nodal Heat Source" : "Nodal Temperature");
 
 	//_________________________________________________________________________________________
-
+			 // Buffers to store the input value
+	static char heatSourceValue[256] = "";
+	static char temperatureValue[256] = "";
 
 	if (selected_constraint_option == 0)
 	{
@@ -52,7 +54,7 @@ void node_window::render_window()
 
 		ImGui::SetNextItemWidth(160.0f);
 		ImGui::SameLine();
-		static char heatSourceValue[256] = ""; // Buffer to store the input value
+		
 		ImGui::InputText("##HeatSource", heatSourceValue, sizeof(heatSourceValue), ImGuiInputTextFlags_CharsDecimal);
 	}
 	else
@@ -62,7 +64,7 @@ void node_window::render_window()
 
 		ImGui::SetNextItemWidth(160.0f);
 		ImGui::SameLine();
-		static char temperatureValue[256] = ""; // Buffer to store the input value
+		
 		ImGui::InputText("##SpecifiedTemperature", temperatureValue, sizeof(temperatureValue), ImGuiInputTextFlags_CharsDecimal);
 	}
 
@@ -93,7 +95,35 @@ void node_window::render_window()
 	// Apply constraint button
 	if (ImGui::Button("Apply"))
 	{
-		apply_nodal_constraint = true; // set the flag to apply to the constraint
+		// Get the data
+		if (selected_constraint_option == 0)
+		{
+			// Option 1: Apply Element Heat Source
+			try
+			{
+				heatsource_q = std::stod(heatSourceValue);
+				apply_nodal_constraint = true; // set the flag to apply to the constraint
+			}
+			catch (const std::invalid_argument& e)
+			{
+				// case where conversion fails (e.g., non-numeric input)
+				heatsource_q = 0.0;
+			}
+		}
+		else if (selected_constraint_option == 1)
+		{
+			// Option 2: Apply Element Temperature
+			try
+			{
+				specifiedTemp_T = std::stod(temperatureValue);
+				apply_nodal_constraint = true; // set the flag to apply to the constraint
+			}
+			catch (const std::invalid_argument& e)
+			{
+				// case where conversion fails (e.g., non-numeric input)
+				specifiedTemp_T = 0.0;
+			}
+		}
 	}
 
 	ImGui::SameLine();

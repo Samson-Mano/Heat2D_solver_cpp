@@ -32,11 +32,11 @@ public:
 	constraints_list_store();
 	~constraints_list_store();
 	void init(geom_parameters* geom_param_ptr);
-	void add_constraints(int constarint_applied_to,int constraint_type,
-		const std::vector<int>& id_list,std::vector<glm::vec2>& constraint_pts,
+	void add_constraints(int constraint_applied_to,int constraint_type,
+		std::vector<int>& id_list,std::vector<glm::vec2>& constraint_pts,
 		const double& heat_source_q, const double& specified_temperature_T,
 		const double& heat_transfer_coeff_h,const double& Ambient_temperature_Tinf);
-	void delete_constraints(int constraint_type);
+	void delete_constraints(int constraint_applied_to);
 	void paint_constraints();
 	void update_geometry_matrices(bool set_modelmatrix, bool set_pantranslation, bool set_zoomtranslation, bool set_transparency, bool set_deflscale);
 

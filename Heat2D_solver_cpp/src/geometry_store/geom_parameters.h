@@ -10,16 +10,10 @@ struct geom_color_theme
 {
 	glm::vec3 background_color = glm::vec3(0);
 	glm::vec3 node_color = glm::vec3(0);
-	glm::vec3 node_selected_color = glm::vec3(0);
+	glm::vec3 selection_color = glm::vec3(0);
 	glm::vec3 line_color = glm::vec3(0);
 	glm::vec3 constraint_color = glm::vec3(0);
-	glm::vec3 load_color = glm::vec3(0);
-	glm::vec3 ptmass_color = glm::vec3(0);
-	glm::vec3 inlcond_displ_color = glm::vec3(0);
-	glm::vec3 inlcond_velo_color = glm::vec3(0);
 	glm::vec3 triangle_color = glm::vec3(0);
-	glm::vec3 triangle_boundary = glm::vec3(0);
-	glm::vec3 triangle_node = glm::vec3(0);
 };
 
 
@@ -39,15 +33,14 @@ class geom_parameters
 {
 public:
 	// Standard sizes
-	const float font_size = static_cast<float>(16.0f * std::pow(10, -5));
+	const float font_size = static_cast<float>(12.0f * std::pow(10, -5));
 	const float node_circle_radii = 0.005f;
 
 	// Precision for various values
-	const int length_precision = 3;
-	const int coord_precision = 3;
-	const int load_precision = 2;
-	const int inlcond_precision = 3;
-	const int defl_precision = 6;
+	const int length_precision = 2;
+	const int coord_precision = 2;
+	const int constraint_precision = 2;
+	
 
 	// Triangle mesh shrunk factor
 	const double traingle_shrunk_factor = 0.8;
@@ -91,6 +84,9 @@ public:
 	static glm::vec2 linear_interpolation(const glm::vec2& pt1, const glm::vec2& pt2, const double& param_t);
 
 	static	glm::vec2 findGeometricCenter(const std::vector<glm::vec2>& all_pts);
+
+	static std::pair<glm::vec2, glm::vec2> findMinMaxXY(const std::vector<glm::vec2>& all_pts);
+
 private:
 
 };

@@ -51,7 +51,11 @@ void edge_window::render_window()
 		(selected_constraint_option == 1) ? "Edge Temperature" : "Edge Convection");
 
 	//_________________________________________________________________________________________
-
+		 // Buffers to store the input value
+	static char heatSourceValue[256] = "";
+	static char temperatureValue[256] = "";
+	static char heattransfercoeffValue[256] = "";
+	static char ambienttemperatureValue[256] = "";
 
 	if (selected_constraint_option == 0)
 	{
@@ -60,7 +64,7 @@ void edge_window::render_window()
 
 		ImGui::SetNextItemWidth(160.0f);
 		ImGui::SameLine();
-		static char heatSourceValue[256] = ""; // Buffer to store the input value
+		
 		ImGui::InputText("##HeatSource", heatSourceValue, sizeof(heatSourceValue), ImGuiInputTextFlags_CharsDecimal);
 	}
 	else if (selected_constraint_option == 1)
@@ -70,7 +74,7 @@ void edge_window::render_window()
 
 		ImGui::SetNextItemWidth(160.0f);
 		ImGui::SameLine();
-		static char temperatureValue[256] = ""; // Buffer to store the input value
+		
 		ImGui::InputText("##SpecifiedTemperature", temperatureValue, sizeof(temperatureValue), ImGuiInputTextFlags_CharsDecimal);
 	}
 	else
@@ -80,7 +84,7 @@ void edge_window::render_window()
 
 		ImGui::SetNextItemWidth(160.0f);
 		ImGui::SameLine();
-		static char heattransfercoeffValue[256] = ""; // Buffer to store the input value
+		
 		ImGui::InputText("##HeatTransferCoeff", heattransfercoeffValue, sizeof(heattransfercoeffValue), ImGuiInputTextFlags_CharsDecimal);
 
 		//______________________________________________________
@@ -89,7 +93,7 @@ void edge_window::render_window()
 
 		ImGui::SetNextItemWidth(160.0f);
 		ImGui::SameLine();
-		static char ambienttemperatureValue[256] = ""; // Buffer to store the input value
+		
 		ImGui::InputText("##AmbientTemperature", ambienttemperatureValue, sizeof(ambienttemperatureValue), ImGuiInputTextFlags_CharsDecimal);
 	}
 
@@ -120,7 +124,51 @@ void edge_window::render_window()
 	// Apply constraint button
 	if (ImGui::Button("Apply"))
 	{
-		apply_edge_constraint = true; // set the flag to apply to the constraint
+		// Get the data
+		if (selected_constraint_option == 0)
+		{
+			// Option 1: Apply Element Heat Source
+			try
+			{
+				heatsource_q = std::stod(heatSourceValue);
+				apply_edge_constraint = true; // set the flag to apply to the constraint
+			}
+			catch (const std::invalid_argument& e)
+			{
+				// case where conversion fails (e.g., non-numeric input)
+				heatsource_q = 0.0;
+			}
+		}
+		else if (selected_constraint_option == 1)
+		{
+			// Option 2: Apply Element Temperature
+			try
+			{
+				specifiedTemp_T = std::stod(temperatureValue);
+				apply_edge_constraint = true; // set the flag to apply to the constraint
+			}
+			catch (const std::invalid_argument& e)
+			{
+				// case where conversion fails (e.g., non-numeric input)
+				specifiedTemp_T = 0.0;
+			}
+		}
+		else
+		{
+			// Option 3: Apply Element Convection
+			try
+			{
+				heattransfercoeff_h = std::stod(heattransfercoeffValue);
+				ambienttemp_Tinf = std::stod(ambienttemperatureValue);
+				apply_edge_constraint = true; // set the flag to apply to the constraint
+			}
+			catch (const std::invalid_argument& e)
+			{
+				// case where conversion fails (e.g., non-numeric input)
+				heattransfercoeff_h = 0.0;
+				ambienttemp_Tinf = 0.0;
+			}
+		}
 	}
 
 	ImGui::SameLine();

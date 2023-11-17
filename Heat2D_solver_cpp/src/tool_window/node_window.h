@@ -17,6 +17,13 @@ public:
 	int selected_constraint_option = 0; // type of constraint option (Nodal heat source or Nodal specified temperature)
 	std::vector<int> selected_nodes;
 
+	// Heat Source q
+	double heatsource_q = 0.0;
+
+	// Specified Temperature T
+	double specifiedTemp_T = 0.0;
+
+
 	node_window();
 	~node_window();
 	void init();

@@ -73,7 +73,7 @@ void elementline_list_store::add_selection_lines(const std::vector<int>& selecte
 	selected_element_lines.clear_lines();
 
 	// Add to Selected Edges
-	glm::vec3 temp_color = geom_param_ptr->geom_colors.node_selected_color;
+	glm::vec3 temp_color = geom_param_ptr->geom_colors.selection_color;
 
 	for (const auto& it : selected_edge_ids)
 	{
@@ -114,7 +114,6 @@ int elementline_list_store::is_line_hit(glm::vec2& loc)
 	// Transform the mouse location to openGL screen coordinates
 	glm::vec2 screenPt = glm::vec2(2.0f * ((loc.x - (geom_param_ptr->window_width * 0.5f)) / max_dim),
 		2.0f * (((geom_param_ptr->window_height * 0.5f) - loc.y) / max_dim));
-
 
 	// Nodal location
 	glm::mat4 scaling_matrix = glm::mat4(1.0) * static_cast<float>(geom_param_ptr->zoom_scale);
@@ -205,7 +204,8 @@ std::vector<int> elementline_list_store::is_edge_selected(const glm::vec2& corne
 }
 
 
-bool elementline_list_store::isClickPointOnLine(const glm::vec2& clickPoint, const glm::vec2& lineStart, const glm::vec2& lineEnd, float threshold)
+bool elementline_list_store::isClickPointOnLine(const glm::vec2& clickPoint, const glm::vec2& lineStart, 
+	const glm::vec2& lineEnd, float threshold)
 {
 	glm::vec2 lineDirection = lineEnd - lineStart;
 	float lineLengthSq = glm::dot(lineDirection, lineDirection);

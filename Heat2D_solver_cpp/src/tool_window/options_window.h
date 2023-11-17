@@ -7,10 +7,10 @@
 class options_window
 {
 public:
-	bool is_show_inlcond = true;
-	bool is_show_inlcond_label = true;
-	bool is_show_linelength = true;
-	bool is_show_loadvalue = true;
+	bool is_show_constraint = true;
+	bool is_show_modelnodes = true;
+	bool is_show_modeledges = true;
+	bool is_show_modelelements = true;
 	bool is_show_window = false;
 
 	options_window();

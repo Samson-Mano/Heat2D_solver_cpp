@@ -40,6 +40,14 @@ void geom_store::fini()
 
 void geom_store::read_rawdata(std::ifstream& input_file)
 {
+	// Create stopwatch
+	Stopwatch_events stopwatch;
+	stopwatch.start();
+	std::stringstream stopwatch_elapsed_str;
+	stopwatch_elapsed_str << std::fixed << std::setprecision(6);
+
+	std::cout << "Reading of input started" << std::endl;
+
 	// Read the Raw Data
 	// Read the entire file into a string
 	std::string file_contents((std::istreambuf_iterator<char>(input_file)),
@@ -54,20 +62,28 @@ void geom_store::read_rawdata(std::ifstream& input_file)
 		lines.push_back(line);
 	}
 
+	stopwatch_elapsed_str << stopwatch.elapsed();
+	std::cout << "Lines loaded at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
+
 	int j = 0;
 
-	// Create a temporary variable to store the nodes
-	nodes_list_store model_nodes;
-	model_nodes.init(&geom_param);
+	// Reinitialize the model geometry
+	is_geometry_set = false;
+	is_analysis_complete = false;
 
-	// Create a temporary variable to store the edges
-	elementline_list_store model_lineelements;
-	model_lineelements.init(&geom_param);
+	// Initialize the model items
+	this->model_nodes.init(&geom_param);
+	this->model_edgeelements.init(&geom_param);
+	this->model_trielements.init(&geom_param);
+	this->model_constraints.init(&geom_param);
 
-	// Create a temporary variable to store the triangles
-	elementtri_list_store model_trielements;
-	model_trielements.init(&geom_param);
+	// Initialize the result store
+	this->wave_response_result.clear_results();
+	this->wave_result_nodes.init(&geom_param);
+	this->wave_result_lineelements.init(&geom_param);
 
+	//Node Point list
+	std::vector<glm::vec2> node_pts_list;
 
 	// Process the lines
 	while (j < lines.size())
@@ -105,11 +121,16 @@ void geom_store::read_rawdata(std::ifstream& input_file)
 				double y = std::stod(splitValues[2]); // Node coordinate y
 
 				glm::vec2 node_pt = glm::vec2(x, y);
+				node_pts_list.push_back(node_pt);
 
 				// Add the nodes
-				model_nodes.add_node(node_id, node_pt);
+				this->model_nodes.add_node(node_id, node_pt);
 				j++;
 			}
+
+			stopwatch_elapsed_str.str("");
+			stopwatch_elapsed_str << stopwatch.elapsed();
+			std::cout << "Nodes read completed at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
 		}
 
 		if (inpt_type == "*ELEMENT,TYPE=S3")
@@ -140,10 +161,15 @@ void geom_store::read_rawdata(std::ifstream& input_file)
 				int nd3 = std::stoi(splitValues[3]); // Node id 3
 
 				// Add the Triangle Elements
-				model_trielements.add_elementtriangle(tri_id, &model_nodes.nodeMap[nd1], &model_nodes.nodeMap[nd2],
+				this->model_trielements.add_elementtriangle(tri_id, &model_nodes.nodeMap[nd1], &model_nodes.nodeMap[nd2],
 					&model_nodes.nodeMap[nd3]);
 				j++;
 			}
+
+
+			stopwatch_elapsed_str.str("");
+			stopwatch_elapsed_str << stopwatch.elapsed();
+			std::cout << "Elements read completed at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
 		}
 
 		// Iterate the line
@@ -163,22 +189,63 @@ void geom_store::read_rawdata(std::ifstream& input_file)
 	{
 		// Add the edges ( ! Note Only distinct edges are added, no copy)
 		// Edge 1 ( 1 -> 2)
-		model_lineelements.add_elementline(edge_count, tri_map.second.nd1, tri_map.second.nd2);
-		edge_count = model_lineelements.elementline_count;
+		this->model_edgeelements.add_elementline(edge_count, tri_map.second.nd1, tri_map.second.nd2);
+		edge_count = this->model_edgeelements.elementline_count;
 
 		// Edge 2 (2 -> 3)
-		model_lineelements.add_elementline(edge_count, tri_map.second.nd2, tri_map.second.nd3);
-		edge_count = model_lineelements.elementline_count;
+		this->model_edgeelements.add_elementline(edge_count, tri_map.second.nd2, tri_map.second.nd3);
+		edge_count = this->model_edgeelements.elementline_count;
 
 		// Edge 3 (3 -> 1)
-		model_lineelements.add_elementline(edge_count, tri_map.second.nd3, tri_map.second.nd1);
-		edge_count = model_lineelements.elementline_count;
+		this->model_edgeelements.add_elementline(edge_count, tri_map.second.nd3, tri_map.second.nd1);
+		edge_count = this->model_edgeelements.elementline_count;
 	}
 
+	stopwatch_elapsed_str.str("");
+	stopwatch_elapsed_str << stopwatch.elapsed();
+	std::cout << "Edges created at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
 
-	// Create the geometry
-	create_geometry(model_nodes, model_lineelements, model_trielements);
+	// Create the default material
+	material_data inpt_material;
+	inpt_material.material_id = 0; // Get the material id
+	inpt_material.material_name = "Default material"; //Default material name
+	inpt_material.thermal_conductivity_kx = 100; // W/m degC
+	inpt_material.thermal_conductivity_ky = 100; //  W/m degC
+	inpt_material.element_thickness = 0.2; // cm
 
+	// Add to materail list
+	elm_prop_window->material_list.clear();
+	elm_prop_window->material_list[inpt_material.material_id] = inpt_material;
+
+	// Geometry is loaded
+	is_geometry_set = true;
+
+	// Set the boundary of the geometry
+	std::pair<glm::vec2, glm::vec2> result = geom_parameters::findMinMaxXY(node_pts_list);
+	this->geom_param.min_b = result.first;
+	this->geom_param.max_b = result.second;
+	this->geom_param.geom_bound = geom_param.max_b - geom_param.min_b;
+
+	// Set the center of the geometry
+	this->geom_param.center = geom_parameters::findGeometricCenter(node_pts_list);
+
+	// Set the geometry
+	update_model_matrix();
+	update_model_zoomfit();
+
+	// Set the geometry buffers
+	this->model_nodes.set_buffer();
+	this->model_edgeelements.set_buffer();
+	this->model_trielements.set_buffer();
+
+	// Set the result object buffers
+	this->wave_result_nodes.set_buffer();
+	this->wave_result_lineelements.set_buffer();
+
+
+	stopwatch_elapsed_str.str("");
+	stopwatch_elapsed_str << stopwatch.elapsed();
+	std::cout << "Model read completed at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
 }
 
 void geom_store::write_rawdata(std::ofstream& output_file)
@@ -367,153 +434,6 @@ void geom_store::update_selection_rectangle(const glm::vec2& o_pt, const glm::ve
 }
 
 
-void geom_store::create_geometry(const nodes_list_store& model_nodes, const elementline_list_store& model_edgeelements,
-	const elementtri_list_store& model_trielements)
-{
-	// Reinitialize the model geometry
-	is_geometry_set = false;
-	is_analysis_complete = false;
-
-	// Initialize the model items
-	this->model_nodes.init(&geom_param);
-	this->model_edgeelements.init(&geom_param);
-	this->model_trielements.init(&geom_param);
-	this->model_constraints.init(&geom_param);
-
-	// Initialize the result store
-	this->wave_response_result.clear_results();
-	this->wave_result_nodes.init(&geom_param);
-	this->wave_result_lineelements.init(&geom_param);
-
-	//_______________________________________________________________________________
-	// Add to the model nodes
-	std::vector<glm::vec2> node_pts_list; // variable to find geometric center and geometric boundary
-
-	for (auto& nd : model_nodes.nodeMap)
-	{
-		// create a temporary node
-		node_store temp_node;
-		temp_node = nd.second;
-
-		// Add to the node list
-		this->model_nodes.add_node(temp_node.node_id, temp_node.node_pt);
-
-		// Add to node point list to calculate the geometric center and geometric boundary
-		node_pts_list.push_back(temp_node.node_pt);
-	}
-
-	// Add to the model edges
-	for (auto& ln : model_edgeelements.elementlineMap)
-	{
-		// create a temporary line element
-		elementline_store temp_line;
-		temp_line = ln.second;
-
-		// Add to the edge list
-		this->model_edgeelements.add_elementline(temp_line.line_id, &this->model_nodes.nodeMap[temp_line.startNode->node_id],
-			&this->model_nodes.nodeMap[temp_line.endNode->node_id]);
-	}
-
-	// Add to the model triangle mesh
-	for (auto& tri : model_trielements.elementtriMap)
-	{
-		// create a temporary triangle element
-		elementtri_store temp_tri;
-		temp_tri = tri.second;
-
-		// Add to the triangle list
-		this->model_trielements.add_elementtriangle(temp_tri.tri_id, &this->model_nodes.nodeMap[temp_tri.nd1->node_id],
-			&this->model_nodes.nodeMap[temp_tri.nd2->node_id], &this->model_nodes.nodeMap[temp_tri.nd3->node_id]);
-	}
-
-	// Create the default material
-	material_data inpt_material;
-	inpt_material.material_id = 0; // Get the material id
-	inpt_material.material_name = "Default material"; //Default material name
-	inpt_material.thermal_conductivity_kx = 100; // W/m degC
-	inpt_material.thermal_conductivity_ky = 100; //  W/m degC
-	inpt_material.element_thickness = 0.2; // cm
-
-	// Add to materail list
-	elm_prop_window->material_list.clear();
-	elm_prop_window->material_list[inpt_material.material_id] = inpt_material;
-
-	// Geometry is loaded
-	is_geometry_set = true;
-
-	// Set the boundary of the geometry
-	std::pair<glm::vec2, glm::vec2> result = findMinMaxXY(model_nodes.nodeMap);
-	this->geom_param.min_b = result.first;
-	this->geom_param.max_b = result.second;
-	this->geom_param.geom_bound = geom_param.max_b - geom_param.min_b;
-
-	// Set the center of the geometry
-	this->geom_param.center = geom_parameters::findGeometricCenter(node_pts_list);
-
-	// Set the geometry
-	update_model_matrix();
-	update_model_zoomfit();
-
-	// Set the geometry buffers
-	this->model_nodes.set_buffer();
-	this->model_edgeelements.set_buffer();
-	this->model_trielements.set_buffer();
-
-	// Set the result object buffers
-	this->wave_result_nodes.set_buffer();
-	this->wave_result_lineelements.set_buffer();
-}
-
-
-std::pair<glm::vec2, glm::vec2> geom_store::findMinMaxXY(const std::unordered_map<int, node_store>& model_nodes)
-{
-	// Initialize min and max values to first node in map
-	glm::vec2 firstNode = model_nodes.begin()->second.node_pt;
-	glm::vec2 minXY = glm::vec2(firstNode.x, firstNode.y);
-	glm::vec2 maxXY = minXY;
-
-	// Loop through all nodes in map and update min and max values
-	for (auto it = model_nodes.begin(); it != model_nodes.end(); ++it)
-	{
-		const auto& node = it->second.node_pt;
-		if (node.x < minXY.x)
-		{
-			minXY.x = node.x;
-		}
-		if (node.y < minXY.y)
-		{
-			minXY.y = node.y;
-		}
-		if (node.x > maxXY.x)
-		{
-			maxXY.x = node.x;
-		}
-		if (node.y > maxXY.y)
-		{
-			maxXY.y = node.y;
-		}
-	}
-
-	// Return pair of min and max values
-	return { minXY, maxXY };
-}
-
-//
-//glm::vec2 geom_store::findGeometricCenter(const std::unordered_map<int, node_store>& model_nodes)
-//{
-//	// Function returns the geometric center of the nodes
-//		// Initialize the sum with zero
-//	glm::vec2 sum(0);
-//
-//	// Sum the points
-//	for (auto it = model_nodes.begin(); it != model_nodes.end(); ++it)
-//	{
-//		sum += it->second.node_pt;
-//	}
-//	return sum / static_cast<float>(model_nodes.size());
-//}
-//
-
 void geom_store::paint_geometry()
 {
 	if (is_geometry_set == false)
@@ -534,14 +454,30 @@ void geom_store::paint_model()
 {
 	//______________________________________________
 	// Paint the model
-	model_trielements.paint_elementtriangles();
-	model_edgeelements.paint_elementlines();
-	model_nodes.paint_model_nodes();
+	if (op_window->is_show_modelelements == true)
+	{
+		// Show the model mesh elements
+		model_trielements.paint_elementtriangles();
+	}
 
-	if (op_window->is_show_inlcond == true)
+	if (op_window->is_show_modeledges == true)
+	{
+		// Show the model edges
+		model_edgeelements.paint_elementlines();
+	}
+	
+	if (op_window->is_show_modelnodes == true)
+	{
+		// Show the model nodes
+		model_nodes.paint_model_nodes();
+	}
+
+	if (op_window->is_show_constraint == true)
 	{
 		// Show the model constraints
+		glPointSize(6.0f);
 		model_constraints.paint_constraints();
+		glPointSize(3.0f);
 	}
 
 	if (nd_window->is_show_window == true)
@@ -553,7 +489,9 @@ void geom_store::paint_model()
 		// Paint the selected nodes
 		if (nd_window->is_selected_count == true)
 		{
+			glPointSize(6.0f);
 			model_nodes.paint_selected_model_nodes();
+			glPointSize(3.0f);
 		}
 
 		// Check whether the selection changed
@@ -579,9 +517,18 @@ void geom_store::paint_model()
 				cnst_pts.push_back(model_nodes.nodeMap[id].node_pt);
 			}
 
+			// null values for convection
+			double node_convection = 0.0;
+			double node_ambienttemp = 0.0;
 
-			model_constraints.add_constraints(0, constraint_type,id_list,cnst_pts)
+			model_constraints.add_constraints(0, constraint_type, id_list, cnst_pts,
+				nd_window->heatsource_q, nd_window->specifiedTemp_T,
+				node_convection, node_ambienttemp);
 			nd_window->apply_nodal_constraint = false;
+
+			// Remove the selection
+			nd_window->selected_nodes.clear();
+			nd_window->is_selection_changed = true;
 		}
 
 		// Delete all the Node constraint
@@ -601,7 +548,9 @@ void geom_store::paint_model()
 		// Paint the selected edges
 		if (edg_window->is_selected_count == true)
 		{
+			glLineWidth(3.2f);
 			model_edgeelements.paint_selected_elementlines();
+			glLineWidth(1.2f);
 		}
 
 		// Check whether the selection changed
@@ -614,8 +563,32 @@ void geom_store::paint_model()
 		// Apply the Edge constraint
 		if (edg_window->apply_edge_constraint == true)
 		{
+			int constraint_type = edg_window->selected_constraint_option; // selected constraint type
+			std::vector<int> id_list;
+			std::vector<glm::vec2> cnst_pts;
 
+			for (const int& id : edg_window->selected_edges)
+			{
+				// Edge Id
+				id_list.push_back(id);
+
+				// Point
+				glm::vec2 start_pt = model_edgeelements.elementlineMap[id].startNode->node_pt;
+				glm::vec2 end_pt = model_edgeelements.elementlineMap[id].endNode->node_pt;
+				glm::vec2 line_mid_pt = geom_parameters::linear_interpolation(start_pt, end_pt, 0.5);
+
+				// Constraint edge mid point list
+				cnst_pts.push_back(line_mid_pt);
+			}
+
+			model_constraints.add_constraints(1, constraint_type, id_list, cnst_pts,
+				edg_window->heatsource_q, edg_window->specifiedTemp_T,
+				edg_window->heattransfercoeff_h, edg_window->ambienttemp_Tinf);
 			edg_window->apply_edge_constraint = false;
+
+			// Remove the selection
+			edg_window->selected_edges.clear();
+			edg_window->is_selection_changed = true;
 		}
 
 		// Delete all the Edge constraint
@@ -647,8 +620,33 @@ void geom_store::paint_model()
 		// Apply the Element constraint
 		if (elm_window->apply_element_constraint == true)
 		{
+			int constraint_type = elm_window->selected_constraint_option; // selected constraint type
+			std::vector<int> id_list;
+			std::vector<glm::vec2> cnst_pts;
 
+			for (const int& id : elm_window->selected_elements)
+			{
+				// Tri Id
+				id_list.push_back(id);
+
+				// Point
+				glm::vec2 pt1 = model_trielements.elementtriMap[id].nd1->node_pt;
+				glm::vec2 pt2 = model_trielements.elementtriMap[id].nd2->node_pt;
+				glm::vec2 pt3 = model_trielements.elementtriMap[id].nd3->node_pt;
+				glm::vec2 tri_midpt = glm::vec2((pt1.x + pt2.x + pt3.x)*0.3333f, (pt1.y + pt2.y + pt3.y) * 0.3333f);
+
+				// Constraint triangle mid point list
+				cnst_pts.push_back(tri_midpt);
+			}
+
+			model_constraints.add_constraints(2, constraint_type, id_list, cnst_pts,
+				elm_window->heatsource_q, elm_window->specifiedTemp_T,
+				elm_window->heattransfercoeff_h, elm_window->ambienttemp_Tinf);
 			elm_window->apply_element_constraint = false;
+
+			// Remove the selection
+			elm_window->selected_elements.clear();
+			elm_window->is_selection_changed = true;
 		}
 
 		// Delete all the Element constraint
@@ -719,7 +717,7 @@ void geom_store::paint_model_results()
 		if (is_analysis_complete == true)
 		{
 			// Pulse response is complete (but clear the results anyway beacuse results will be loaded at open)
-			sol_window->wave_analysis_complete = false;
+			sol_window->heat_analysis_complete = false;
 
 			// Pulse response analysis is complete
 			update_model_transperency(false);
@@ -737,15 +735,6 @@ void geom_store::paint_model_results()
 	// Paint the pulse analysis result
 	if (is_analysis_complete == true)
 	{
-		// Update the deflection scale
-		geom_param.normalized_defl_scale = 1.0f;
-		geom_param.defl_scale = sol_window->deformation_scale_max;
-
-		// Update the deflection scale
-		wave_result_lineelements.update_geometry_matrices(false, false, false, false, true);
-		wave_result_nodes.update_geometry_matrices(false, false, false, false, true);
-		// ______________________________________________________________________________________
-
 		// Paint the pulse lines
 		wave_result_lineelements.paint_wave_elementlines(sol_window->time_step);
 
@@ -759,15 +748,6 @@ void geom_store::paint_model_results()
 		// Execute the open sequence
 		if (is_analysis_complete == true)
 		{
-			// Set the pulse response analysis result
-			sol_window->wave_analysis_complete = true;
-			sol_window->time_interval_atrun = wave_response_result.time_interval;
-			sol_window->time_step_count = wave_response_result.time_step_count;
-
-			// Reset the buffers for pulse result nodes and lines
-			wave_result_lineelements.set_buffer();
-			wave_result_nodes.set_buffer();
-
 			// Pulse response analysis is complete
 			update_model_transperency(true);
 		}
@@ -775,19 +755,14 @@ void geom_store::paint_model_results()
 		sol_window->execute_open = false;
 	}
 
-	if (sol_window->execute_dynamic_analysis == true)
+	if (sol_window->execute_heat_analysis == true)
 	{
-
+		// Execute Heat Analysis
 
 
 		// Check whether the modal analysis is complete or not
 		if (is_analysis_complete == true)
 		{
-			// Set the pulse response analysis result
-			sol_window->wave_analysis_complete = true;
-			sol_window->time_interval_atrun = wave_response_result.time_interval;
-			sol_window->time_step_count = wave_response_result.time_step_count;
-
 			// Reset the buffers for pulse result nodes and lines
 			wave_result_lineelements.set_buffer();
 			wave_result_nodes.set_buffer();
@@ -796,6 +771,6 @@ void geom_store::paint_model_results()
 			update_model_transperency(true);
 		}
 
-		sol_window->execute_dynamic_analysis = false;
+		sol_window->execute_heat_analysis = false;
 	}
 }

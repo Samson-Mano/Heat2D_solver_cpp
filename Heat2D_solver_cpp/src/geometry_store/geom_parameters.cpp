@@ -20,21 +20,43 @@ void geom_parameters::init()
 	main_font.create_atlas(resourcePath);
 
 	// Initialize the color theme
-	geom_colors.background_color = glm::vec3(0.62f, 0.62f, 0.62f);
-	geom_colors.node_color = glm::vec3(0.0f, 0.0f, 0.4f);
-	geom_colors.node_selected_color = glm::vec3(0.8039f, 0.3608f, 0.3608f);
+	geom_colors.background_color = glm::vec3(0.62f, 0.62f, 0.62f); // White
+	geom_colors.selection_color = glm::vec3(0.862745f, 0.078431f, 0.23529f); // Crimson
+	geom_colors.constraint_color = glm::vec3(0.0f, 0.50196f, 0.0f); // Green
 
-	geom_colors.line_color = glm::vec3(0.0f, 0.2f, 0.6f);
-	geom_colors.constraint_color = glm::vec3(0.6f, 0.0f, 0.6f);
-	geom_colors.load_color = glm::vec3(0.0f, 1.0f, 0.0f);
-	geom_colors.ptmass_color = glm::vec3(0.82f, 0.77f, 0.92f);
-	geom_colors.inlcond_displ_color = glm::vec3(0.96f, 0.5f, 0.1f);
-	geom_colors.inlcond_velo_color = glm::vec3(0.54f, 0.06f, 0.31f);
+	// Theme 1 
+	geom_colors.node_color = glm::vec3(0.54509f, 0.0f, 0.4f); // Dark Red
+	geom_colors.line_color = glm::vec3(1.0f, 0.54901f, 0.6f); // Dark Orange
+	geom_colors.triangle_color = glm::vec3(0.90196f, 0.90196f, 0.98039f); // Lavender
 
+	//// Theme 2
+	//geom_colors.node_color = glm::vec3(135.0f / 255.0f, 206.0f / 255.0f, 250.0f / 255.0f); // Sky Blue
+	//geom_colors.line_color = glm::vec3(47.0f / 255.0f, 79.0f / 255.0f, 79.0f / 255.0f); // Dark Slate Gray
+	//geom_colors.triangle_color = glm::vec3(240.0f / 255.0f, 128.0f / 255.0f, 128.0f / 255.0f); // Light Coral
+
+	//// Theme 3
+	//geom_colors.node_color = glm::vec3(144.0f / 255.0f, 238.0f / 255.0f, 144.0f / 255.0f); // Light Green
+	//geom_colors.line_color = glm::vec3(105.0f / 255.0f, 105.0f / 255.0f, 105.0f / 255.0f); // Dim Gray
+	//geom_colors.triangle_color = glm::vec3(147.0f / 255.0f, 112.0f / 255.0f, 219.0f / 255.0f); // Medium Purple
+
+	//// Theme 4
+	//geom_colors.node_color = glm::vec3(255.0f / 255.0f, 215.0f / 255.0f, 0.0f); // Gold
+	//geom_colors.line_color = glm::vec3(85.0f / 255.0f, 107.0f / 255.0f, 47.0f / 255.0f); // Dark Olive Green
+	//geom_colors.triangle_color = glm::vec3(218.0f / 255.0f, 112.0f / 255.0f, 214.0f / 255.0f); // Orchid
+
+
+	/*
+	// Initialize the color theme
+	geom_colors.background_color = glm::vec3(0.62f, 0.62f, 0.62f); 
+	geom_colors.node_color = glm::vec3(0.0f, 0.0f, 0.4f); 
+	geom_colors.selection_color = glm::vec3(0.8039f, 0.3608f, 0.3608f); 
+
+	geom_colors.line_color = glm::vec3(0.0f, 0.2f, 0.6f); 
+	geom_colors.constraint_color = glm::vec3(0.0f, 0.1f, 0.0f); 
+	
 	// Traingle mesh
-	geom_colors.triangle_color = glm::vec3(0.82f, 0.77f, 0.92f);
-	geom_colors.triangle_boundary = geom_colors.triangle_color * 0.8f;
-	geom_colors.triangle_node = geom_colors.triangle_color * 0.6f;
+	geom_colors.triangle_color = glm::vec3(0.82f, 0.77f, 0.92f); 
+	*/
 }
 
 
@@ -109,11 +131,50 @@ glm::vec2 geom_parameters::findGeometricCenter(const std::vector<glm::vec2>& all
 	glm::vec2 sum(0);
 
 	// Sum the points
-	for (auto it = all_pts.begin(); it != all_pts.end(); ++it)
+	for (const auto& pt : all_pts)
 	{
-		sum += it;
+		sum += pt;
 	}
 	return sum / static_cast<float>(all_pts.size());
+}
+
+
+std::pair<glm::vec2, glm::vec2> geom_parameters::findMinMaxXY(const std::vector<glm::vec2>& all_pts)
+{
+	if (static_cast<int>(all_pts.size()) < 1)
+	{
+		// Null input
+		return {glm::vec2(0),glm::vec2(0)};
+	}
+
+	// Initialize min and max values to first node in map
+	glm::vec2 firstNode = all_pts[0];
+	glm::vec2 minXY = glm::vec2(firstNode.x, firstNode.y);
+	glm::vec2 maxXY = minXY;
+
+	// Loop through all nodes in map and update min and max values
+	for (const auto& pt : all_pts)
+	{
+		if (pt.x < minXY.x)
+		{
+			minXY.x = pt.x;
+		}
+		if (pt.y < minXY.y)
+		{
+			minXY.y = pt.y;
+		}
+		if (pt.x > maxXY.x)
+		{
+			maxXY.x = pt.x;
+		}
+		if (pt.y > maxXY.y)
+		{
+			maxXY.y = pt.y;
+		}
+	}
+
+	// Return pair of min and max values
+	return { minXY, maxXY };
 }
 
 

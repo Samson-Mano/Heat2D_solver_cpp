@@ -33,8 +33,6 @@ public:
 	void paint_tri_material_id();
 
 	void paint_elementtriangles_shrunk();
-	void paint_elementtriangles_boundarylines();
-	void paint_elementtriangles_boundarypts();
 	std::vector<int> is_tri_selected(const glm::vec2& corner_pt1, const glm::vec2& corner_pt2);
 
 	void update_geometry_matrices(bool set_modelmatrix, bool set_pantranslation, bool set_zoomtranslation, bool set_transparency, bool set_deflscale);
@@ -42,26 +40,10 @@ public:
 private:
 	geom_parameters* geom_param_ptr = nullptr;
 	label_list_store element_materialid;
-	line_list_store element_boundarylines;
-	point_list_store element_boundarypts;
 	tri_list_store element_tris;
 	tri_list_store element_tris_shrunk;
 	tri_list_store selected_element_tris_shrunk;
 
 	//Update material Id
 	void update_material_id_labels();
-
-	// Add triangle boundary lines
-	void addtriangle_boundarylines(const glm::vec2& nd_pt1, const glm::vec2& nd_pt2, const glm::vec2& nd_pt3);
-	bool customLineStoreBinarySearch(const std::vector<line_store>& vec, const line_store& target);
-	void customLineStoreSort(std::vector<line_store>& vec);
-	line_store getLine(const glm::vec2& line_startpt_loc, const glm::vec2& line_endpt_loc);
-	bool compareLines(const line_store& a, const line_store& b);
-
-	// Add triangle boundary points
-	void addtriangle_boundarypts(const glm::vec2& nd_pt1, const glm::vec2& nd_pt2, const glm::vec2& nd_pt3);
-	bool customPointStoreBinarySearch(const std::vector<point_store>& vec, const point_store& target);
-	void customPointStoreSort(std::vector<point_store>& vec);
-	point_store getPoint(const glm::vec2& pt_loc);
-	bool comparePoints(const point_store& a, const point_store& b);
 };

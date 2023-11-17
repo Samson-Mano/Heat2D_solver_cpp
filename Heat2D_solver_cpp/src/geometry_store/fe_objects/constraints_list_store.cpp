@@ -24,15 +24,15 @@ void constraints_list_store::init(geom_parameters* geom_param_ptr)
 	constraintMap.clear();
 }
 
-void constraints_list_store::add_constraints(int constarint_applied_to, int constraint_type, 
-	const std::vector<int>& id_list, std::vector<glm::vec2>& constraint_pts,
-	const double& heat_source_q, const double& specified_temperature_T, 
+void constraints_list_store::add_constraints(int constraint_applied_to, int constraint_type,
+	std::vector<int>& id_list, std::vector<glm::vec2>& constraint_pts,
+	const double& heat_source_q, const double& specified_temperature_T,
 	const double& heat_transfer_coeff_h, const double& Ambient_temperature_Tinf)
 {
 	// Create a temporary constraint
 	constraints_store temp_cnst;
 	temp_cnst.constraint_id = get_unique_constraint_id(); // constraint ID
-	temp_cnst.constraint_applied_to = constarint_applied_to; // constraint Applie To (Node, Edge, Element)
+	temp_cnst.constraint_applied_to = constraint_applied_to; // constraint Applied To (Node, Edge, Element)
 	temp_cnst.constraint_type = constraint_type; // Type of constraint (heat source, specified temp, heat convection)
 	temp_cnst.id_list = id_list; // store the id list of constraint applies (Nodes, Edges, Elements)
 	temp_cnst.constraint_pts = constraint_pts; // Constraint points
@@ -51,7 +51,7 @@ void constraints_list_store::add_constraints(int constarint_applied_to, int cons
 	update_constraint_pts_labels();
 }
 
-void constraints_list_store::delete_constraints(int constraint_type)
+void constraints_list_store::delete_constraints(int constraint_applied_to)
 {
 	// Find the ids of the constraints matching the type
 	std::vector<int> constraint_id;
@@ -61,7 +61,7 @@ void constraints_list_store::delete_constraints(int constraint_type)
 		// get the id
 		int cnst_id = c_id.first;
 
-		if (constraintMap[cnst_id].constraint_type == constraint_type)
+		if (constraintMap[cnst_id].constraint_applied_to == constraint_applied_to)
 		{
 			// Constraint type matches (Add to the id list)
 			constraint_id.push_back(cnst_id);
@@ -127,31 +127,44 @@ void constraints_list_store::update_constraint_pts_labels()
 	for (const auto& cnst_m : constraintMap)
 	{
 		constraints_store cnst = cnst_m.second;
+		std::stringstream ss;
 
 		// Add the labels
 		if (cnst.constraint_type == 0)
 		{
-			// Heat source
-			temp_str = "Heat Source q = " + std::to_string(cnst.heat_source_q);
+			// Heat source q
+			ss << std::fixed << std::setprecision(geom_param_ptr->constraint_precision) << cnst.heat_source_q;
+
+			temp_str = "Heat Source q = " + ss.str();
 			constraint_value_labels.add_text(temp_str, cnst.average_pt, glm::vec2(0), cnst_color, 0, true, false);
 
 		}
 		else if (cnst.constraint_type == 1)
 		{
-			// Specified Temperature
-			temp_str = "Temperature T = " + std::to_string(cnst.specified_temperature_T);
+			// Specified Temperature T
+			ss << std::fixed << std::setprecision(geom_param_ptr->constraint_precision) << cnst.specified_temperature_T;
+
+			temp_str = "Temperature T = " + ss.str();
 			constraint_value_labels.add_text(temp_str, cnst.average_pt, glm::vec2(0), cnst_color, 0, true, false);
 		}
 		else if (cnst.constraint_type == 2)
 		{
-			// Heat Convection
-			temp_str = "Heat transfer co-eff h = " + std::to_string(cnst.heat_transfer_coeff_h) + 
-				"\n Ambient Temperature Tinf = " + std::to_string(cnst.Ambient_temperature_Tinf);
+			// Heat Convection h
+			ss << std::fixed << std::setprecision(geom_param_ptr->constraint_precision) << cnst.heat_transfer_coeff_h;
 
+			temp_str = "Heat transfer co-eff h = " + ss.str();
 			constraint_value_labels.add_text(temp_str, cnst.average_pt, glm::vec2(0), cnst_color, 0, true, false);
+
+			// Ambient Temperature Tinf
+			ss.str("");
+			ss << std::fixed << std::setprecision(geom_param_ptr->constraint_precision) << cnst.Ambient_temperature_Tinf;
+
+			temp_str = "Ambient Temperature Tinf = " + ss.str();
+			constraint_value_labels.add_text(temp_str, cnst.average_pt, glm::vec2(0), cnst_color, 0, false, false);
+
 		}
 	}
-	
+
 	constraint_value_labels.set_buffer();
 }
 

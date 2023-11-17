@@ -21,6 +21,7 @@
 #include "fe_objects/nodes_list_store.h"
 #include "fe_objects/elementline_list_store.h"
 #include "fe_objects/elementtri_list_store.h"
+#include "fe_objects/constraints_list_store.h"
 
 // Geometry Objects
 #include "geometry_objects/dynamic_selrectangle_store.h"
@@ -73,8 +74,9 @@ private:
 	elementtri_list_store model_trielements;
 
 	// Constraints
+	constraints_list_store model_constraints;
 
-	// Wave analysis result 
+	// Heat analysis result 
 	wave_analysis_result_store wave_response_result;
 	wave_nodes_list_store wave_result_nodes;
 	wave_elementline_list_store wave_result_lineelements;
@@ -90,16 +92,7 @@ private:
 	element_window* elm_window = nullptr;
 	element_prop_window* elm_prop_window = nullptr;
 
-	// Create geometry
-	void create_geometry(const nodes_list_store& model_nodes, const elementline_list_store& model_edgeelements,
-		const elementtri_list_store& model_trielements);
-
-	std::pair<glm::vec2, glm::vec2> findMinMaxXY(const std::unordered_map<int, node_store>& model_nodes);
-	// glm::vec2 findGeometricCenter(const std::unordered_map<int, node_store>& model_nodes);
-
-
 	void paint_model(); // Paint the model
 	void paint_model_results(); // Paint the results
-
 };
 

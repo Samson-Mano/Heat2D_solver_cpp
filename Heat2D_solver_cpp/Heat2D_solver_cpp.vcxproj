@@ -148,9 +148,7 @@
     <ClCompile Include="src\events_handler\mouse_event_handler.cpp" />
     <ClCompile Include="src\events_handler\Stopwatch_events.cpp" />
     <ClCompile Include="src\fe_solver\analysis_solver.cpp" />
-    <ClCompile Include="src\geometry_store\analysis_result_objects\wave_analysis_result_store.cpp" />
-    <ClCompile Include="src\geometry_store\analysis_result_objects\wave_elementline_list_store.cpp" />
-    <ClCompile Include="src\geometry_store\analysis_result_objects\wave_nodes_list_store.cpp" />
+    <ClCompile Include="src\geometry_store\analysis_result_objects\heatcontour_tri_list_store.cpp" />
     <ClCompile Include="src\geometry_store\fe_objects\constraints_list_store.cpp" />
     <ClCompile Include="src\geometry_store\fe_objects\elementline_list_store.cpp" />
     <ClCompile Include="src\geometry_store\fe_objects\elementtri_list_store.cpp" />
@@ -195,9 +193,7 @@
     <ClInclude Include="src\events_handler\mouse_event_handler.h" />
     <ClInclude Include="src\events_handler\Stopwatch_events.h" />
     <ClInclude Include="src\fe_solver\analysis_solver.h" />
-    <ClInclude Include="src\geometry_store\analysis_result_objects\wave_analysis_result_store.h" />
-    <ClInclude Include="src\geometry_store\analysis_result_objects\wave_elementline_list_store.h" />
-    <ClInclude Include="src\geometry_store\analysis_result_objects\wave_nodes_list_store.h" />
+    <ClInclude Include="src\geometry_store\analysis_result_objects\heatcontour_tri_list_store.h" />
     <ClInclude Include="src\geometry_store\fe_objects\constraints_list_store.h" />
     <ClInclude Include="src\geometry_store\fe_objects\elementline_list_store.h" />
     <ClInclude Include="src\geometry_store\fe_objects\elementtri_list_store.h" />
@@ -267,6 +263,9 @@
     <Image Include="resources\images\innx_icon.png" />
     <Image Include="resources\images\load_img.png" />
     <Image Include="resources\images\pic_3D_circle.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="src\junk\junk_code.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

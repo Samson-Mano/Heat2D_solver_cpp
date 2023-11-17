@@ -13,10 +13,10 @@ options_window::~options_window()
 void options_window::init()
 {
     // Initialize the options
-    is_show_inlcond = true;
-    is_show_inlcond_label = true;
-    is_show_linelength = true;
-    is_show_loadvalue = true;
+    is_show_constraint = true;
+    is_show_modelnodes = true;
+    is_show_modeledges = true;
+    is_show_modelelements = true;
     is_show_window = false;
 }
 
@@ -28,11 +28,15 @@ void options_window::render_window()
     // Create a new ImGui options window
     ImGui::Begin("View Options");
 
-    // Add 5 checkboxes
-    ImGui::Checkbox("Show Initial Condition", &is_show_inlcond);
-    ImGui::Checkbox("Show Initial Condition Label", &is_show_inlcond_label);
-    ImGui::Checkbox("Show line length", &is_show_linelength);
-    ImGui::Checkbox("Show load value", &is_show_loadvalue);
+    // Add 4 checkboxes
+    ImGui::Checkbox("Show Constraints", &is_show_constraint);
+    ImGui::Checkbox("Show Nodes", &is_show_modelnodes);
+    ImGui::Checkbox("Show Edges", &is_show_modeledges);
+    ImGui::Checkbox("Show Elements", &is_show_modelelements);
+
+
+    ImGui::Spacing();
+    ImGui::Spacing();
 
     // Add a "Close" button
     if (ImGui::Button("Close"))

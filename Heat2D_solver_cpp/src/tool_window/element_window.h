@@ -16,6 +16,19 @@ public:
 	int selected_constraint_option = 0; // type of constraint option (Element heat source or Element specified temperature or Element convection)
 	std::vector<int> selected_elements;
 
+	// Heat Source q
+	double heatsource_q = 0.0;
+
+	// Specified Temperature T
+	double specifiedTemp_T = 0.0;
+
+	// Heat Convection
+	// Heat Transfer Co-eff h
+	double heattransfercoeff_h = 0.0;
+
+	// Ambient Temperature Tinf
+	double ambienttemp_Tinf = 0.0;
+
 
 	element_window();
 	~element_window();

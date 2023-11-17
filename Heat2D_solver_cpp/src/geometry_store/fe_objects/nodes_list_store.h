@@ -30,16 +30,13 @@ public:
 	void set_buffer();
 	void paint_model_nodes();
 	void paint_selected_model_nodes();
-	void paint_label_node_ids();
-	void paint_label_node_coords();
+
 	int is_node_hit(glm::vec2& loc);
 	std::vector<int> is_node_selected(const glm::vec2& corner_pt1, const glm::vec2& corner_pt2);
 	void update_geometry_matrices(bool set_modelmatrix, bool set_pantranslation, bool set_zoomtranslation, bool set_transparency, bool set_deflscale);
 
 private:
 	geom_parameters* geom_param_ptr = nullptr;
-	label_list_store node_id_labels;
-	label_list_store node_coord_labels;
 
 	point_list_store node_points;
 	point_list_store selected_node_points;
