@@ -87,6 +87,8 @@ public:
 
 	static std::pair<glm::vec2, glm::vec2> findMinMaxXY(const std::vector<glm::vec2>& all_pts);
 
+	static glm::vec3 getContourColor(float value);
+
 private:
 
 };

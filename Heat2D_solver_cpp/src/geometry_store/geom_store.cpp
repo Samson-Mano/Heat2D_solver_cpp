@@ -78,9 +78,7 @@ void geom_store::read_rawdata(std::ifstream& input_file)
 	this->model_constraints.init(&geom_param);
 
 	// Initialize the result store
-	this->wave_response_result.clear_results();
-	this->wave_result_nodes.init(&geom_param);
-	this->wave_result_lineelements.init(&geom_param);
+	this->model_contourresults.init(&geom_param);
 
 	//Node Point list
 	std::vector<glm::vec2> node_pts_list;
@@ -239,9 +237,7 @@ void geom_store::read_rawdata(std::ifstream& input_file)
 	this->model_trielements.set_buffer();
 
 	// Set the result object buffers
-	this->wave_result_nodes.set_buffer();
-	this->wave_result_lineelements.set_buffer();
-
+	this->model_contourresults.set_buffer();
 
 	stopwatch_elapsed_str.str("");
 	stopwatch_elapsed_str << stopwatch.elapsed();
@@ -297,8 +293,8 @@ void geom_store::update_model_matrix()
 	model_constraints.update_geometry_matrices(true, false, false, false, false);
 
 	// Update the modal analysis result matrix
-	wave_result_lineelements.update_geometry_matrices(true, false, false, false, false);
-	wave_result_nodes.update_geometry_matrices(true, false, false, false, false);
+	model_contourresults.update_geometry_matrices(true, false, false, false, false);
+	
 }
 
 void geom_store::update_model_zoomfit()
@@ -319,8 +315,8 @@ void geom_store::update_model_zoomfit()
 	model_constraints.update_geometry_matrices(false, true, true, false, false);
 
 	// Update the modal analysis result matrix
-	wave_result_lineelements.update_geometry_matrices(false, true, true, false, false);
-	wave_result_nodes.update_geometry_matrices(false, true, true, false, false);
+	model_contourresults.update_geometry_matrices(false, true, true, false, false);
+	
 }
 
 void geom_store::update_model_pan(glm::vec2& transl)
@@ -341,8 +337,8 @@ void geom_store::update_model_pan(glm::vec2& transl)
 	model_constraints.update_geometry_matrices(false, true, false, false, false);
 
 	// Update the modal analysis result matrix
-	wave_result_lineelements.update_geometry_matrices(false, true, false, false, false);
-	wave_result_nodes.update_geometry_matrices(false, true, false, false, false);
+	model_contourresults.update_geometry_matrices(false, true, false, false, false);
+	
 }
 
 void geom_store::update_model_zoom(double& z_scale)
@@ -360,8 +356,8 @@ void geom_store::update_model_zoom(double& z_scale)
 	model_constraints.update_geometry_matrices(false, false, true, false, false);
 
 	// Update the modal analysis result matrix
-	wave_result_lineelements.update_geometry_matrices(false, false, true, false, false);
-	wave_result_nodes.update_geometry_matrices(false, false, true, false, false);
+	model_contourresults.update_geometry_matrices(false, false, true, false, false);
+	
 }
 
 void geom_store::update_model_transperency(bool is_transparent)
@@ -735,11 +731,8 @@ void geom_store::paint_model_results()
 	// Paint the pulse analysis result
 	if (is_analysis_complete == true)
 	{
-		// Paint the pulse lines
-		wave_result_lineelements.paint_wave_elementlines(sol_window->time_step);
+		// Paint the Contour triangles and Contour lines
 
-		// Paint the pulse nodes
-		wave_result_nodes.paint_wave_nodes(sol_window->time_step);
 	}
 
 
@@ -764,8 +757,8 @@ void geom_store::paint_model_results()
 		if (is_analysis_complete == true)
 		{
 			// Reset the buffers for pulse result nodes and lines
-			wave_result_lineelements.set_buffer();
-			wave_result_nodes.set_buffer();
+			//wave_result_lineelements.set_buffer();
+			//wave_result_nodes.set_buffer();
 
 			// Pulse response analysis is complete
 			update_model_transperency(true);

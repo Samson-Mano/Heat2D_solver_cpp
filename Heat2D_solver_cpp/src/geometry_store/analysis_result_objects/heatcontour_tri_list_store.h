@@ -1,5 +1,7 @@
 #pragma once
 #include "../fe_objects/nodes_list_store.h"
+#include "../geometry_objects/line_list_store.h"
+#include "../geometry_objects/tri_list_store.h"
 
 struct heatcontour_tri_data
 {
@@ -9,9 +11,9 @@ struct heatcontour_tri_data
 	node_store* nd3 = nullptr; // node 2
 
 	// Node values at each time step 
-	double nd1_values = 0.0;
-	double nd2_values = 0.0;
-	double nd3_values = 0.0;
+	double nd1_value = 0.0;
+	double nd2_value = 0.0;
+	double nd3_value = 0.0;
 
 	// ratio with maximum and minimum = (nd_values - min)/ (max - min)
 	double nd1_mag_ratio = 0.0;
@@ -19,9 +21,9 @@ struct heatcontour_tri_data
 	double nd3_mag_ratio = 0.0;
 
 	// Nodal colors at each time step
-	glm::vec3 nd1_colors = glm::vec3(0);
-	glm::vec3 nd2_colors = glm::vec3(0);
-	glm::vec3 nd3_colors = glm::vec3(0);
+	glm::vec3 nd1_color = glm::vec3(0);
+	glm::vec3 nd2_color = glm::vec3(0);
+	glm::vec3 nd3_color = glm::vec3(0);
 };
 
 class heatcontour_tri_list_store
@@ -35,7 +37,7 @@ public:
 	void init(geom_parameters* geom_param_ptr);
 	void add_heatcontourtriangle(int& tri_id, node_store* nd1, node_store* nd2, node_store* nd3,
 		const double& nd1_values, const double& nd2_values, const double& nd3_values,
-		const double& max_vals, const double& min_vals);
+		const double& contour_max_vals, const double& contour_min_vals);
 	void set_buffer();
 	void paint_tricontour();
 	void paint_tricontour_lines();
@@ -43,8 +45,7 @@ public:
 	void update_geometry_matrices(bool set_modelmatrix, bool set_pantranslation, bool set_zoomtranslation, bool set_transparency, bool set_deflscale);
 private:
 	geom_parameters* geom_param_ptr = nullptr;
-
-
-
+	tri_list_store contour_tris;
+	line_list_store contour_lines;
 
 };

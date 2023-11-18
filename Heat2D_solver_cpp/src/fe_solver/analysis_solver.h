@@ -8,9 +8,7 @@
 #include "../geometry_store/fe_objects/elementline_list_store.h"
 
 // FE Result Objects Wave analysis
-#include "../geometry_store/analysis_result_objects/wave_analysis_result_store.h";
-#include "../geometry_store/analysis_result_objects/wave_elementline_list_store.h";
-#include "../geometry_store/analysis_result_objects/wave_nodes_list_store.h";
+#include "../geometry_store/analysis_result_objects/heatcontour_tri_list_store.h";
 
 // Stop watch
 #include "../events_handler/Stopwatch_events.h"

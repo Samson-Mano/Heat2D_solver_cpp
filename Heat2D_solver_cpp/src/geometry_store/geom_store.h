@@ -26,10 +26,9 @@
 // Geometry Objects
 #include "geometry_objects/dynamic_selrectangle_store.h"
 
-// FE Result Objects Wave analysis
-#include "analysis_result_objects/wave_analysis_result_store.h";
-#include "analysis_result_objects/wave_elementline_list_store.h";
-#include "analysis_result_objects/wave_nodes_list_store.h";
+// FE Result Objects Heat analysis
+#include "analysis_result_objects/heatcontour_tri_list_store.h";
+
 
 class geom_store
 {
@@ -77,9 +76,8 @@ private:
 	constraints_list_store model_constraints;
 
 	// Heat analysis result 
-	wave_analysis_result_store wave_response_result;
-	wave_nodes_list_store wave_result_nodes;
-	wave_elementline_list_store wave_result_lineelements;
+	heatcontour_tri_list_store model_contourresults;
+
 
 	// Analysis
 	bool is_analysis_complete = false;
