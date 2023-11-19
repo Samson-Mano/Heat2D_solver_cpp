@@ -21,7 +21,7 @@ void geom_store::init(analysis_window* sol_window, options_window* op_window,
 	selection_rectangle.init(&geom_param);
 
 	is_geometry_set = false;
-	is_analysis_complete = false;
+	is_heat_analysis_complete = false;
 
 	// Add the window pointers
 	this->sol_window = sol_window; // Solver window
@@ -69,7 +69,7 @@ void geom_store::read_rawdata(std::ifstream& input_file)
 
 	// Reinitialize the model geometry
 	is_geometry_set = false;
-	is_analysis_complete = false;
+	is_heat_analysis_complete = false;
 
 	// Initialize the model items
 	this->model_nodes.init(&geom_param);
@@ -452,8 +452,16 @@ void geom_store::paint_model()
 	// Paint the model
 	if (op_window->is_show_modelelements == true)
 	{
-		// Show the model mesh elements
-		model_trielements.paint_elementtriangles();
+		if (op_window->is_show_shrunkmesh == false)
+		{
+			// Show the model mesh elements
+			model_trielements.paint_elementtriangles();
+		}
+		else
+		{
+			// Show shrunk triangle mesh
+			model_trielements.paint_elementtriangles_shrunk();
+		}
 	}
 
 	if (op_window->is_show_modeledges == true)
@@ -706,42 +714,41 @@ void geom_store::paint_model()
 void geom_store::paint_model_results()
 {
 	// Paint the results
-	// Check closing sequence for Pulse response analysis window
+	// Check closing sequence for Heat analysis window
 	if (sol_window->execute_close == true)
 	{
 		// Execute the close sequence
-		if (is_analysis_complete == true)
+		if (is_heat_analysis_complete == true)
 		{
-			// Pulse response is complete (but clear the results anyway beacuse results will be loaded at open)
-			sol_window->heat_analysis_complete = false;
-
-			// Pulse response analysis is complete
+			// Heat analysis is complete
 			update_model_transperency(false);
 		}
 
 		sol_window->execute_close = false;
 	}
 
-	// Check whether the modal analysis solver window is open or not
+	// Check whether the Heat analysis solver window is open or not
 	if (sol_window->is_show_window == false)
 	{
 		return;
 	}
 
-	// Paint the pulse analysis result
-	if (is_analysis_complete == true)
+	// Paint the Heat analysis result
+	if (is_heat_analysis_complete == true)
 	{
-		// Paint the Contour triangles and Contour lines
+		// Paint the Contour triangles
+		model_contourresults.paint_tricontour();
 
+		// Paint the Contour lines
+		model_contourresults.paint_tricontour_lines();
 	}
-
 
 	if (sol_window->execute_open == true)
 	{
 		// Execute the open sequence
-		if (is_analysis_complete == true)
+		if (is_heat_analysis_complete == true)
 		{
-			// Pulse response analysis is complete
+			// Heat analysis is complete
 			update_model_transperency(true);
 		}
 
@@ -751,16 +758,22 @@ void geom_store::paint_model_results()
 	if (sol_window->execute_heat_analysis == true)
 	{
 		// Execute Heat Analysis
+		analysis_solver heat_solver;
+		heat_solver.heat_analysis_start(model_nodes,
+			model_edgeelements,
+			model_trielements,
+			model_constraints,
+			elm_prop_window->material_list,
+			model_contourresults,
+			is_heat_analysis_complete);
 
-
-		// Check whether the modal analysis is complete or not
-		if (is_analysis_complete == true)
+		// Check whether the heat analysis is complete or not
+		if (is_heat_analysis_complete == true)
 		{
-			// Reset the buffers for pulse result nodes and lines
-			//wave_result_lineelements.set_buffer();
-			//wave_result_nodes.set_buffer();
-
-			// Pulse response analysis is complete
+			// Reset the buffers for heat result contour
+			model_contourresults.set_buffer();
+			
+			// Heat analysis is complete (Transperency change)
 			update_model_transperency(true);
 		}
 

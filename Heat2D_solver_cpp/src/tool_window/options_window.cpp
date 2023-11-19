@@ -17,6 +17,7 @@ void options_window::init()
     is_show_modelnodes = true;
     is_show_modeledges = true;
     is_show_modelelements = true;
+    is_show_shrunkmesh = false;
     is_show_window = false;
 }
 
@@ -33,6 +34,7 @@ void options_window::render_window()
     ImGui::Checkbox("Show Nodes", &is_show_modelnodes);
     ImGui::Checkbox("Show Edges", &is_show_modeledges);
     ImGui::Checkbox("Show Elements", &is_show_modelelements);
+    ImGui::Checkbox("Show Shrunk Triangles", &is_show_shrunkmesh);
 
 
     ImGui::Spacing();

@@ -80,7 +80,7 @@ private:
 
 
 	// Analysis
-	bool is_analysis_complete = false;
+	bool is_heat_analysis_complete = false;
 
 	// Window pointers
 	analysis_window* sol_window = nullptr;
