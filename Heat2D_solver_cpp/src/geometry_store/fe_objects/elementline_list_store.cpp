@@ -239,3 +239,22 @@ void elementline_list_store::update_geometry_matrices(bool set_modelmatrix, bool
 	element_lines.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_zoomtranslation, set_transparency, set_deflscale);
 	selected_element_lines.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_zoomtranslation, set_transparency, set_deflscale);
 }
+
+int elementline_list_store::get_edge_id(const int& startNode_id, const int& endNode_id)
+{
+	// Return the edge id
+	for (const auto& line_m : elementlineMap)
+	{
+		const elementline_store& line = line_m.second;
+
+		if ((line.startNode->node_id == startNode_id && line.endNode->node_id == endNode_id) ||
+			(line.startNode->node_id == endNode_id && line.endNode->node_id == startNode_id))
+		{
+			// Line with the same start and end nodes already exists (do not add)
+			return line.line_id;
+		}
+	}
+
+	// Non found
+	return -1;
+}

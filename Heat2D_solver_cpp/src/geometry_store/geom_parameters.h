@@ -89,6 +89,8 @@ public:
 
 	static glm::vec3 getContourColor(float value);
 
+	static double get_triangle_area(const glm::vec2& pt1, const glm::vec2& pt2, const glm::vec2& pt3);
+
 private:
 
 };

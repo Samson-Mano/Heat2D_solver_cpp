@@ -40,6 +40,16 @@
 typedef Eigen::SparseMatrix<double> SparseMatrix;
 #pragma warning(pop)
 
+struct fe_constraint_store
+{
+	int id = -1;
+	double heat_source_q = 0.0; // Heat source
+	double specified_temperature_T = 0.0; // Specified temperature
+	double heat_transfer_coeff_h = 0.0; // Heat Transfer Co-efficient
+	double Ambient_temperature_Tinf = 0.0; // Ambient temperature
+};
+
+
 
 class analysis_solver
 {
@@ -51,11 +61,11 @@ public:
 
 	analysis_solver();
 	~analysis_solver();
-	void heat_analysis_start(const nodes_list_store& model_nodes,
-							 const elementline_list_store& model_edgeelements,
+	void heat_analysis_start(nodes_list_store& model_nodes,
+							 elementline_list_store& model_edgeelements,
 							 const elementtri_list_store& model_trielements,
 							 const constraints_list_store& model_constraints,
-							 const std::unordered_map<int, material_data>& material_list,
+							 std::unordered_map<int, material_data>& material_list,
 							 heatcontour_tri_list_store& model_contourresults,
 							 bool& is_heat_analysis_complete);
 
@@ -64,6 +74,85 @@ private:
 	int numDOF = 0;
 	int reducedDOF = 0;
 	std::unordered_map<int, int> nodeid_map;
+
+
+	void map_constraints_to_feobjects(nodes_list_store& model_nodes,
+		elementline_list_store& model_edgeelements,
+		const elementtri_list_store& model_trielements,
+		const constraints_list_store& model_constraints,
+		std::unordered_map<int, fe_constraint_store>& node_constraints,
+		std::unordered_map<int, fe_constraint_store>& edge_constraints,
+		std::unordered_map<int, fe_constraint_store>& element_constraints);
+
+
+	void get_element_conduction_matrix(const glm::vec2& node_pt1,
+		const glm::vec2& node_pt2, 
+		const glm::vec2& node_pt3,
+		const double& elm_kx,
+		const double& elm_ky,
+		const double& elm_thickness,
+		const double& elm_area,
+		Eigen::SparseMatrix<double>& Element_conduction_matrix);
+
+
+	void get_element_convection_matrix(const double& elm_heat_transfer_coeff,
+		const double& elm_area,
+		const double& elm_thickness,
+		Eigen::SparseMatrix<double>& element_convection_matrix);
+
+
+	void get_element_edge_heat_convection_matrix(const double& edg1_heattransfer_co_eff,
+		const double& edg2_heattransfer_co_eff,
+		const double& edg3_heattransfer_co_eff,
+		const double& edg1_length,
+		const double& edg2_length,
+		const double& edg3_length,
+		const double& elm_thickness,
+		Eigen::SparseMatrix<double>& element_edge_convection_matrix);
+
+
+	void get_element_ambient_temp_matrix(const double& elm_heat_transfer_coeff,
+		const double& elm_area,
+		const double& elm_thickness,
+		const double& elm_ambient_temp,
+		Eigen::SparseVector<double>& element_ambient_temp_matrix);
+
+
+	void get_element_heat_source_matrix(const double& elm_heat_source,
+		const double& elm_area,
+		const double& elm_thickness,
+		Eigen::SparseVector<double>& element_heat_source_matrix);
+
+
+	void get_edge_heatsource_matrix(const double& edg1_heatsource,
+		const double& edg2_heatsource,
+		const double& edg3_heatsource,
+		const double& edg1_length,
+		const double& edg2_length,
+		const double& edg3_length,
+		const double& elm_thickness,
+		Eigen::SparseVector<double>& edge_heatsource_matrix);
+
+
+	void get_edge_heatconvection_matrix(const double& edg1_heattransfer_coeff,
+		const double& edg2_heattransfer_coeff,
+		const double& edg3_heattransfer_coeff,
+		const double& edg1_ambient_temp,
+		const double& edg2_ambient_temp,
+		const double& edg3_ambient_temp,
+		const double& edg1_length,
+		const double& edg2_length,
+		const double& edg3_length,
+		const double& elm_thickness, 
+		Eigen::SparseVector<double>& edge_heatconvection_matrix);
+
+
+	void get_edge_spectemp_matrix(const double& edg1_spectemp,
+		const double& edg2_spectemp,
+		const double& edg3_spectemp,
+		Eigen::SparseVector<double>& edge_spectemp_matrix);
+
+
 
 
 

@@ -30,6 +30,8 @@ public:
 	bool isClickPointOnLine(const glm::vec2& clickPoint, const glm::vec2& lineStart, const glm::vec2& lineEnd, float threshold);
 	void update_geometry_matrices(bool set_modelmatrix, bool set_pantranslation, bool set_zoomtranslation, bool set_transparency, bool set_deflscale);
 
+	int get_edge_id(const int& startNode_id, const int& endNode_id);
+
 private:
 	geom_parameters* geom_param_ptr = nullptr;
 	line_list_store element_lines;

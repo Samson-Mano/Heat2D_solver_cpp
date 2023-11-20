@@ -220,6 +220,22 @@ glm::vec3 geom_parameters::getContourColor(float value)
 	return color;
 }
 
+double get_triangle_area(const glm::vec2& pt1, const glm::vec2& pt2, const glm::vec2& pt3)
+{
+	double x1 = static_cast<double>(pt1.x);
+	double y1 = static_cast<double>(pt1.y);
+	double x2 = static_cast<double>(pt2.x);
+	double y2 = static_cast<double>(pt2.y);
+	double x3 = static_cast<double>(pt3.x);
+	double y3 = static_cast<double>(pt3.y);
+
+	// Shoelace formula
+	double area = 0.5 * std::abs(x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2));
+
+	return area;
+}
+
+
 // Stop watch
 void Stopwatch::reset_time()
 {
