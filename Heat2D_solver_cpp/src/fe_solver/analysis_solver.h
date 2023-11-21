@@ -9,14 +9,13 @@
 #include "../geometry_store/fe_objects/elementtri_list_store.h"
 #include "../geometry_store/fe_objects/constraints_list_store.h"
 
-// Material Data
-#include "../tool_window/element_prop_window.h"
-
 // FE Result Objects Heat analysis
 #include "../geometry_store/analysis_result_objects/heatcontour_tri_list_store.h";
 
 // Stop watch
 #include "../events_handler/Stopwatch_events.h"
+
+#include "../geometry_store/geom_parameters.h"
 
 #pragma warning(push)
 #pragma warning (disable : 26451)
@@ -153,8 +152,26 @@ private:
 		Eigen::SparseVector<double>& edge_spectemp_matrix);
 
 
+	void set_global_matrices(const Eigen::SparseMatrix<double>& element_k_matrix,
+		const Eigen::SparseVector<double>& element_f_matrix,
+		const Eigen::SparseVector<double>& element_dof_matrix,
+		const int& nd1_id,
+		const int& nd2_id,
+		const int& nd3_id,
+		Eigen::SparseMatrix<double>& global_k_matrix,
+		Eigen::SparseVector<double>& global_f_matrix,
+		Eigen::SparseVector<double>& global_dof_matrix);
 
+	void get_reduced_global_matrices(const Eigen::SparseMatrix<double>& global_k_matrix,
+		const Eigen::SparseVector<double>& global_f_matrix,
+		const Eigen::SparseVector<double>& global_spec_temp_matrix,
+		const Eigen::SparseVector<double>& global_dof_matrix,
+		Eigen::SparseMatrix<double>& reduced_global_k_matrix,
+		Eigen::SparseVector<double>& reduced_global_f_matrix);
 
+	void set_global_T_matrix(const Eigen::SparseVector<double>& reduced_global_T_matrix,
+		const Eigen::SparseVector<double>& global_dof_matrix, 
+		Eigen::SparseVector<double>& global_T_matrix);
 
 
 };

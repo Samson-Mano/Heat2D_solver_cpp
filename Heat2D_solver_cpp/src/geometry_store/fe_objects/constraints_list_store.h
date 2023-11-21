@@ -1,11 +1,5 @@
 #pragma once
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
-#include <unordered_map>
-#include "../geom_parameters.h"
-#include "../geometry_buffers/gBuffers.h"
-#include "../geometry_objects/label_list_store.h"
-#include "../geometry_objects/point_list_store.h"
+#include "nodes_list_store.h"
 
 struct constraints_store
 {

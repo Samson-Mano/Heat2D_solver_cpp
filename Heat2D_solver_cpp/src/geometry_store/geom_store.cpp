@@ -448,6 +448,12 @@ void geom_store::paint_geometry()
 
 void geom_store::paint_model()
 {
+	if (sol_window->is_show_window == true && is_heat_analysis_complete == true && sol_window->show_model == false)
+	{
+		// Analysis complete and user turned off model view
+		return;
+	}
+
 	//______________________________________________
 	// Paint the model
 	if (op_window->is_show_modelelements == true)

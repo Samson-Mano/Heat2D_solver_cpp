@@ -91,6 +91,15 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 	// Set the number of DOF
 	numDOF = static_cast<int>(nodeid_map.size());
 
+	Eigen::SparseMatrix<double> global_k_matrix(numDOF, numDOF); // Global K Matrix
+	Eigen::SparseVector<double> global_f_matrix(numDOF); // Global F Matrix
+	Eigen::SparseVector<double> global_dof_matrix(numDOF); // Global DOF Matrix
+
+	// Set zeros
+	global_k_matrix.setZero();
+	global_f_matrix.setZero();
+	global_dof_matrix.setZero();
+
 	//_______________________________________________________________________________________________
 	// Step 0 
 	// Create the constraint data
@@ -132,9 +141,9 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 		int edg3_id = model_edgeelements.get_edge_id(nd3_id, nd1_id); // Edge 3
 
 		// get the edge lengths
-		double edg1_length = 1.0;
-		double edg2_length = 1.0;
-		double edg3_length = 1.0;
+		double edg1_length = geom_parameters::get_line_length(elm.nd1->node_pt, elm.nd2->node_pt);
+		double edg2_length = geom_parameters::get_line_length(elm.nd2->node_pt, elm.nd3->node_pt);
+		double edg3_length = geom_parameters::get_line_length(elm.nd3->node_pt, elm.nd1->node_pt);
 
 		// get the material parameters of this element
 		double elm_kx = material_list[elm.material_id].thermal_conductivity_kx; // Thermal conductivity Kx
@@ -259,13 +268,207 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 		//________________________________________________________________________________________________
 		//_____________________________Matrices End__________________________________________________
 		//________________________________________________________________________________________________
+		// Step 13: Set the global matrices
+
+		set_global_matrices(element_k_matrix,
+			element_f_matrix,
+			element_dof_matrix,
+			nd1_id,
+			nd2_id,
+			nd3_id,
+			global_k_matrix,
+			global_f_matrix,
+			global_dof_matrix);
+
+	}
+
+	stopwatch_elapsed_str.str("");
+	stopwatch_elapsed_str << stopwatch.elapsed();
+	std::cout << "Global matrices creation completed at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
+
+	// Step 14: Apply nodal heat source and nodal specified temperature, also calculate global specified tempearture matrix
+	reducedDOF = 0;
+	
+	for (const auto& ind_m : nodeid_map)
+	{
+		int node_id = ind_m.first;
+		int index = ind_m.second;
+
+		// Add the heat source at node
+		global_f_matrix.coeffRef(index) += node_constraints[node_id].heat_source_q;
+
+		// Add the specified temperature at node
+		global_dof_matrix.coeffRef(index) += node_constraints[node_id].specified_temperature_T;
+
+		// Find the reduced DOF count
+		if (global_dof_matrix.coeff(index) == 0)
+		{
+			reducedDOF++;
+		}
+	}
+
+	// Applying specified temerature as source
+	Eigen::SparseVector<double> global_spec_temp_matrix(numDOF); // Global Specified Temperature Matrix
+	global_spec_temp_matrix = -1.0 * (global_k_matrix * global_dof_matrix);
 
 
+	// Step 15: Apply Boundary condition (Create reduced global k & f matrix)
+	Eigen::SparseMatrix<double> reduced_global_k_matrix(reducedDOF, reducedDOF); // Reduced Global K Matrix
+	Eigen::SparseVector<double> reduced_global_f_matrix(reducedDOF); // Reduced Global F Matrix
+
+	get_reduced_global_matrices(global_k_matrix,
+		global_f_matrix,
+		global_spec_temp_matrix,
+		global_dof_matrix,
+		reduced_global_k_matrix,
+		reduced_global_f_matrix);
+
+	stopwatch_elapsed_str.str("");
+	stopwatch_elapsed_str << stopwatch.elapsed();
+	std::cout << "Boundary condition applied at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
+
+	// Step 16: Solve the Reduced Global Matrices (KT = F)
+	Eigen::SparseVector<double> reduced_global_T_matrix(reducedDOF); // Reduced Global T Matrix
+
+	Eigen::SparseLU<Eigen::SparseMatrix<double>> solver;
+	solver.compute(reduced_global_k_matrix);
+
+	if (solver.info() != Eigen::Success) 
+	{
+		// decomposition failed
+		stopwatch_elapsed_str.str("");
+		stopwatch_elapsed_str << stopwatch.elapsed();
+		std::cout << "K-Matrix decomposition failed at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
+		std::cout << "Analysis failed !!!!!! "  << std::endl;
+		return;
+	}
+
+	reduced_global_T_matrix = solver.solve(reduced_global_f_matrix);
+
+	if (solver.info() != Eigen::Success)
+	{
+		// solving failed
+		stopwatch_elapsed_str.str("");
+		stopwatch_elapsed_str << stopwatch.elapsed();
+		std::cout << "Solving failed at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
+		std::cout << "Analysis failed !!!!!! " << std::endl;
+		return;
+	}
+
+	// Step 17: Create the global temperature value
+	Eigen::SparseVector<double> global_T_matrix(numDOF); // Global T Matrix
+
+	set_global_T_matrix(reduced_global_T_matrix,
+		global_dof_matrix,
+		global_T_matrix);
+
+	//________________________________________________________________________________________________________
+	//________________________________________________________________________________________________________
+	//________________________________________________________________________________________________________
+	// Check the results
+	// Check if any coefficient is NaN, is Infinity
+	double maxtempValue = -std::numeric_limits<double>::infinity();
+	double mintempValue = std::numeric_limits<double>::infinity();
+
+	for (int i = 0; i < static_cast<int>(global_T_matrix.size()); i++)
+	{
+		double value = global_T_matrix.coeff(i);
+
+		// Check if the value is NaN
+		if (std::isnan(value)) 
+		{
+			stopwatch_elapsed_str.str("");
+			stopwatch_elapsed_str << stopwatch.elapsed();
+			std::cout << "NaN results found at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
+			std::cout << "Analysis failed !!!!!! " << std::endl;
+			return;  // No need to continue checking
+		}
+
+		// Check if the value is infinity
+		if (std::isinf(value))
+		{
+			stopwatch_elapsed_str.str("");
+			stopwatch_elapsed_str << stopwatch.elapsed();
+			std::cout << "Infinity results found at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
+			std::cout << "Analysis failed !!!!!! " << std::endl;
+			return;  // No need to continue checking
+		}
+
+		// Update maximum value
+		if (value > maxtempValue)
+		{
+			maxtempValue = value;
+		}
+
+		// Update minimum value
+		if (value < mintempValue)
+		{
+			mintempValue = value;
+		}
+	}
+
+	if (std::abs(maxtempValue - mintempValue) < 1E-10)
+	{
+		stopwatch_elapsed_str.str("");
+		stopwatch_elapsed_str << stopwatch.elapsed();
+		std::cout << "Temperature difference is less than E-10, failed at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
+		std::cout << "Analysis failed !!!!!! " << std::endl;
+		return;  // No need to continue checking
+	}
+
+
+	// Analysis successful
+	// Print the results
+	stopwatch_elapsed_str.str("");
+	stopwatch_elapsed_str << maxtempValue;
+	std::cout << "Maximum Temperature = " << stopwatch_elapsed_str.str()<< std::endl;
+
+	stopwatch_elapsed_str.str("");
+	stopwatch_elapsed_str << mintempValue;
+	std::cout << "Minimum Temperature = " << stopwatch_elapsed_str.str() << std::endl;
+	std::cout << "Analysis complete !!!!!! " << std::endl;
+
+	is_heat_analysis_complete = true;
+
+	stopwatch_elapsed_str.str("");
+	stopwatch_elapsed_str << stopwatch.elapsed();
+	std::cout << "Analysis complete at " << stopwatch_elapsed_str.str() << std::endl;
+
+	// Map the results
+	model_contourresults.clear_results();
+
+	for (auto& elm_m : model_trielements.elementtriMap)
+	{
+		// get the element
+		elementtri_store elm = elm_m.second;
+
+		// get the node ids of the element
+		int nd1_id = elm.nd1->node_id; // Node 1
+		int nd2_id = elm.nd2->node_id; // Node 2
+		int nd3_id = elm.nd3->node_id; // Node 3
+		
+		// Node temperature values
+		double nd1_val = global_T_matrix.coeff(nodeid_map[nd1_id]);
+		double nd2_val = global_T_matrix.coeff(nodeid_map[nd2_id]);
+		double nd3_val = global_T_matrix.coeff(nodeid_map[nd3_id]);
+
+		// Create contour triangle
+		model_contourresults.add_heatcontourtriangle(elm.tri_id,
+			elm.nd1,
+			elm.nd2,
+			elm.nd3,
+			nd1_val,
+			nd2_val,
+			nd3_val,
+			maxtempValue,
+			mintempValue);
 
 	}
 
 
-
+	stopwatch_elapsed_str.str("");
+	stopwatch_elapsed_str << stopwatch.elapsed();
+	std::cout << "Results mapping complete at = " << stopwatch_elapsed_str.str() << std::endl;
 
 }
 
@@ -463,8 +666,6 @@ void analysis_solver::get_element_conduction_matrix(const glm::vec2& node_pt1,
 
 	D_matrix.insert(1, 0) = 0.0;
 	D_matrix.insert(1, 1) = elm_ky;
-
-	Eigen::SparseMatrix<double> Element_conduction_matrix(3, 3); // Element B matrix
 
 	double elm_volume = elm_area * elm_thickness;
 
@@ -732,5 +933,106 @@ void analysis_solver::get_edge_spectemp_matrix(const double& edg1_spectemp,
 	edge_ki_spec_temp_matrix.insert(2) = const_3 * 1.0;
 
 	edge_spec_temp_matrix = edge_ij_spec_temp_matrix + edge_jk_spec_temp_matrix + edge_ki_spec_temp_matrix;
+
+}
+
+
+
+void analysis_solver::set_global_matrices(const Eigen::SparseMatrix<double>& element_k_matrix, 
+	const Eigen::SparseVector<double>& element_f_matrix, 
+	const Eigen::SparseVector<double>& element_dof_matrix, 
+	const int& nd1_id, const int& nd2_id, const int& nd3_id, 
+	Eigen::SparseMatrix<double>& global_k_matrix, 
+	Eigen::SparseVector<double>& global_f_matrix, 
+	Eigen::SparseVector<double>& global_dof_matrix)
+{
+	// Global K Matrix
+	// Set the row 1
+	global_k_matrix.coeffRef(nodeid_map[nd1_id], nodeid_map[nd1_id]) += element_k_matrix.coeff(0, 0);
+	global_k_matrix.coeffRef(nodeid_map[nd1_id], nodeid_map[nd2_id]) += element_k_matrix.coeff(0, 1);
+	global_k_matrix.coeffRef(nodeid_map[nd1_id], nodeid_map[nd3_id]) += element_k_matrix.coeff(0, 2);
+
+	// Set the row 2
+	global_k_matrix.coeffRef(nodeid_map[nd2_id], nodeid_map[nd1_id]) += element_k_matrix.coeff(1, 0);
+	global_k_matrix.coeffRef(nodeid_map[nd2_id], nodeid_map[nd2_id]) += element_k_matrix.coeff(1, 1);
+	global_k_matrix.coeffRef(nodeid_map[nd2_id], nodeid_map[nd3_id]) += element_k_matrix.coeff(1, 2);
+
+	// Set the row 3
+	global_k_matrix.coeffRef(nodeid_map[nd3_id], nodeid_map[nd1_id]) += element_k_matrix.coeff(2, 0);
+	global_k_matrix.coeffRef(nodeid_map[nd3_id], nodeid_map[nd2_id]) += element_k_matrix.coeff(2, 1);
+	global_k_matrix.coeffRef(nodeid_map[nd3_id], nodeid_map[nd3_id]) += element_k_matrix.coeff(2, 2);
+
+
+	// Global F Matrix
+	global_f_matrix.coeffRef(nodeid_map[nd1_id]) += element_f_matrix.coeff(0);
+	global_f_matrix.coeffRef(nodeid_map[nd2_id]) += element_f_matrix.coeff(1);
+	global_f_matrix.coeffRef(nodeid_map[nd3_id]) += element_f_matrix.coeff(2);
+
+
+	// Global DOF Matrix
+	global_dof_matrix.coeffRef(nodeid_map[nd1_id]) += element_dof_matrix.coeff(0);
+	global_dof_matrix.coeffRef(nodeid_map[nd2_id]) += element_dof_matrix.coeff(1);
+	global_dof_matrix.coeffRef(nodeid_map[nd3_id]) += element_dof_matrix.coeff(2);
+
+
+}
+
+void analysis_solver::get_reduced_global_matrices(const Eigen::SparseMatrix<double>& global_k_matrix, 
+	const Eigen::SparseVector<double>& global_f_matrix, 
+	const Eigen::SparseVector<double>& global_spec_temp_matrix, 
+	const Eigen::SparseVector<double>& global_dof_matrix, 
+	Eigen::SparseMatrix<double>& reduced_global_k_matrix, Eigen::SparseVector<double>& reduced_global_f_matrix)
+{
+	int r = 0, s = 0;
+	for (int i = 0; i < numDOF; i++)
+	{
+		if (global_dof_matrix.coeff(i) != 0)
+		{
+			continue;
+		}
+		else
+		{
+			// apply boundary condition to global f matrix
+			reduced_global_f_matrix.coeffRef(r) = global_f_matrix.coeff(i) + global_spec_temp_matrix.coeff(i);
+			s = 0;
+			for (int j = 0; j < numDOF; j++)
+			{
+				if (global_dof_matrix.coeff(j)!= 0)
+				{
+					continue;
+				}
+				else
+				{
+					// apply boundary condition to global k matrix
+					reduced_global_k_matrix.coeffRef(r, s) = global_k_matrix.coeff(i, j);
+					s++;
+				}
+			}
+			r++;
+		}
+	}
+
+
+
+}
+
+void analysis_solver::set_global_T_matrix(const Eigen::SparseVector<double>& reduced_global_T_matrix, 
+	const Eigen::SparseVector<double>& global_dof_matrix, 
+	Eigen::SparseVector<double>& global_T_matrix)
+{
+	// Create global t matrix from the reduced global t matrix
+	int r = 0;
+	for (int i = 0; i < numDOF; i++)
+	{
+		if (global_dof_matrix.coeff(i) != 0)
+		{
+			global_T_matrix.coeffRef(i) = global_dof_matrix.coeff(i);
+		}
+		else
+		{
+			global_T_matrix.coeffRef(i) = reduced_global_T_matrix.coeff(r);
+			r++;
+		}
+	}
 
 }

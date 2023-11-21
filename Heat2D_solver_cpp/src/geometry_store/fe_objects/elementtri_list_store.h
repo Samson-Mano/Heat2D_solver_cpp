@@ -1,6 +1,5 @@
 #pragma once
-#include "nodes_list_store.h"
-#include "../geometry_objects/line_list_store.h"
+#include "elementline_list_store.h"
 #include "../geometry_objects/tri_list_store.h"
 
 struct elementtri_store

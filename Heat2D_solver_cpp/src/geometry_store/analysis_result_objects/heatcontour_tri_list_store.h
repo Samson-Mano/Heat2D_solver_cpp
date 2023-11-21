@@ -1,7 +1,5 @@
 #pragma once
-#include "../fe_objects/nodes_list_store.h"
-#include "../geometry_objects/line_list_store.h"
-#include "../geometry_objects/tri_list_store.h"
+#include "../fe_objects/elementtri_list_store.h"
 
 struct heatcontour_tri_data
 {
@@ -39,6 +37,7 @@ public:
 		const double& nd1_values, const double& nd2_values, const double& nd3_values,
 		const double& contour_max_vals, const double& contour_min_vals);
 	void set_buffer();
+	void clear_results();
 	void paint_tricontour();
 	void paint_tricontour_lines();
 

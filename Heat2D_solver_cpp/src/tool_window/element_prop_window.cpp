@@ -1,5 +1,6 @@
 #include "element_prop_window.h"
 
+
 element_prop_window::element_prop_window()
 {
 	// Empty Constructor

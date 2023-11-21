@@ -45,9 +45,9 @@ void heatcontour_tri_list_store::add_heatcontourtriangle(int& tri_id, node_store
 	temp_heattri.nd3_mag_ratio = (nd3_values - contour_min_vals) / (contour_max_vals - contour_min_vals);
 
 	// Add to the Node color list
-	temp_heattri.nd1_color = geom_parameters::getContourColor(1.0f - temp_heattri.nd1_mag_ratio);
-	temp_heattri.nd2_color = geom_parameters::getContourColor(1.0f - temp_heattri.nd2_mag_ratio);
-	temp_heattri.nd3_color = geom_parameters::getContourColor(1.0f - temp_heattri.nd3_mag_ratio);
+	temp_heattri.nd1_color = geom_parameters::getHeatMapColor(1.0f - temp_heattri.nd1_mag_ratio);
+	temp_heattri.nd2_color = geom_parameters::getHeatMapColor(1.0f - temp_heattri.nd2_mag_ratio);
+	temp_heattri.nd3_color = geom_parameters::getHeatMapColor(1.0f - temp_heattri.nd3_mag_ratio);
 
 	// Insert to the result Map
 	heatcontourtriMap.insert({ tri_id, temp_heattri });
@@ -60,10 +60,10 @@ void heatcontour_tri_list_store::add_heatcontourtriangle(int& tri_id, node_store
 
 	contour_tris.add_tri(tri_id, node_pt1, node_pt2, node_pt3,
 		glm::vec2(0), glm::vec2(0), glm::vec2(0),
-		temp_heattri.nd1_color, temp_heattri.nd2_color, temp_heattri.nd3_color, true);
+		temp_heattri.nd1_color, temp_heattri.nd2_color, temp_heattri.nd3_color, false);
 
 	//__________________________ Add the contour lines
-	for (double param_t = 0.2; param_t <= 1.0; param_t += 0.2)
+	for (double param_t = 0.1; param_t <= 1.0; param_t += 0.1)
 	{
 		double cntr_lvl = contour_min_vals * (1.0 - param_t) + (contour_max_vals * param_t);
 
@@ -83,7 +83,7 @@ void heatcontour_tri_list_store::add_heatcontourtriangle(int& tri_id, node_store
 
 				// Contour color
 				double contour_level_ratio = (cntr_lvl - contour_min_vals) / (contour_max_vals - contour_min_vals);
-				glm::vec3 contour_line_color = geom_parameters::getContourColor(static_cast<float> (contour_level_ratio));
+				glm::vec3 contour_line_color = geom_parameters::getHeatMapColor(static_cast<float> (1.0f - contour_level_ratio));
 
 				// Add to the contour lines
 				int contour_id = contour_lines.line_count;
@@ -102,7 +102,7 @@ void heatcontour_tri_list_store::add_heatcontourtriangle(int& tri_id, node_store
 
 				// Contour color
 				double contour_level_ratio = (cntr_lvl - contour_min_vals) / (contour_max_vals - contour_min_vals);
-				glm::vec3 contour_line_color = geom_parameters::getContourColor(static_cast<float> (contour_level_ratio));
+				glm::vec3 contour_line_color = geom_parameters::getHeatMapColor(static_cast<float> (1.0f - contour_level_ratio));
 
 				// Add to the contour lines
 				int contour_id = contour_lines.line_count;
@@ -124,7 +124,7 @@ void heatcontour_tri_list_store::add_heatcontourtriangle(int& tri_id, node_store
 
 				// Contour color
 				double contour_level_ratio = (cntr_lvl - contour_min_vals) / (contour_max_vals - contour_min_vals);
-				glm::vec3 contour_line_color = geom_parameters::getContourColor(static_cast<float> (contour_level_ratio));
+				glm::vec3 contour_line_color = geom_parameters::getHeatMapColor(static_cast<float> (1.0f - contour_level_ratio));
 
 				// Add to the contour lines
 				int contour_id = contour_lines.line_count;
@@ -139,6 +139,17 @@ void heatcontour_tri_list_store::set_buffer()
 	// Set the buffers for the Model
 	contour_tris.set_buffer();
 	contour_lines.set_buffer();
+}
+
+void heatcontour_tri_list_store::clear_results()
+{
+	// Clear the triangles and contour lines
+	contour_tris.clear_triangles();
+	contour_lines.clear_lines();
+
+	// Clear the results
+	heatcontourtri_count = 0;
+	heatcontourtriMap.clear();
 }
 
 void heatcontour_tri_list_store::paint_tricontour()

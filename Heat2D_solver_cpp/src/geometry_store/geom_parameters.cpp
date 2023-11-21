@@ -177,8 +177,61 @@ std::pair<glm::vec2, glm::vec2> geom_parameters::findMinMaxXY(const std::vector<
 	return { minXY, maxXY };
 }
 
+glm::vec3 geom_parameters::getHeatMapColor(float value)
+{
+	float hsl_h = value * 240;
+	const int alpha_i = 120;
+	const float hsl_s = 1.0;
+	const float hsl_l = 0.5;
 
-glm::vec3 geom_parameters::getContourColor(float value)
+	double r = 0;
+	double g = 0;
+	double b = 0;
+
+
+	if (hsl_s == 0)
+	{
+		r = g = b = (hsl_l * 255);
+	}
+	else
+	{
+		double v1, v2;
+		double hue = hsl_h / 360;
+
+		v2 = (hsl_l < 0.5) ? (hsl_l * (1 + hsl_s)) : ((hsl_l + hsl_s) - (hsl_l * hsl_s));
+		v1 = (2 * hsl_l) - v2;
+
+		r = (255 * HueToRGB(v1, v2, hue + (1.0f / 3)));
+		g = (255 * HueToRGB(v1, v2, hue));
+		b = (255 * HueToRGB(v1, v2, hue - (1.0f / 3)));
+	}
+
+	glm::vec3 color = glm::vec3(r / 255.0f, g / 255.0f, b / 255.0f);
+	return color;
+}
+
+double geom_parameters::HueToRGB(double v1, double v2, double vH)
+{
+	if (vH < 0)
+		vH += 1;
+
+	if (vH > 1)
+		vH -= 1;
+
+	if ((6 * vH) < 1)
+		return (v1 + (v2 - v1) * 6 * vH);
+
+	if ((2 * vH) < 1)
+		return v2;
+
+	if ((3 * vH) < 2)
+		return (v1 + (v2 - v1) * ((2.0f / 3) - vH) * 6);
+
+	return v1;
+}
+
+
+glm::vec3 geom_parameters::getContourColor_d(float value)
 {
 	// return the contour color based on the value (0 to 1)
 	glm::vec3 color;
@@ -220,7 +273,9 @@ glm::vec3 geom_parameters::getContourColor(float value)
 	return color;
 }
 
-double get_triangle_area(const glm::vec2& pt1, const glm::vec2& pt2, const glm::vec2& pt3)
+
+
+double geom_parameters::get_triangle_area(const glm::vec2& pt1, const glm::vec2& pt2, const glm::vec2& pt3)
 {
 	double x1 = static_cast<double>(pt1.x);
 	double y1 = static_cast<double>(pt1.y);
@@ -235,6 +290,13 @@ double get_triangle_area(const glm::vec2& pt1, const glm::vec2& pt2, const glm::
 	return area;
 }
 
+double geom_parameters::get_line_length(const glm::vec2& pt1, const glm::vec2& pt2)
+{
+	// Length of line
+	double length = std::sqrt(std::pow(pt1.x - pt2.x, 2) + std::pow(pt1.y - pt2.y, 2));
+
+	return length;
+}
 
 // Stop watch
 void Stopwatch::reset_time()

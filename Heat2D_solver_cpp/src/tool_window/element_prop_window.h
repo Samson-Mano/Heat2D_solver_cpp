@@ -7,17 +7,6 @@
 #include "../ImGui/imgui_impl_opengl3.h"
 #include "../geometry_store/geom_parameters.h"
 
-
-struct material_data
-{
-	unsigned int material_id = 0;
-	std::string material_name = "";
-	double thermal_conductivity_kx = 0.0;
-	double thermal_conductivity_ky = 0.0;
-	double element_thickness = 0.0;
-};
-
-
 class element_prop_window
 {
 public:

@@ -16,6 +16,14 @@ struct geom_color_theme
 	glm::vec3 triangle_color = glm::vec3(0);
 };
 
+struct material_data
+{
+	unsigned int material_id = 0;
+	std::string material_name = "";
+	double thermal_conductivity_kx = 0.0;
+	double thermal_conductivity_ky = 0.0;
+	double element_thickness = 0.0;
+};
 
 class Stopwatch
 {
@@ -41,7 +49,6 @@ public:
 	const int coord_precision = 2;
 	const int constraint_precision = 2;
 	
-
 	// Triangle mesh shrunk factor
 	const double traingle_shrunk_factor = 0.8;
 
@@ -87,11 +94,16 @@ public:
 
 	static std::pair<glm::vec2, glm::vec2> findMinMaxXY(const std::vector<glm::vec2>& all_pts);
 
-	static glm::vec3 getContourColor(float value);
+	static glm::vec3 getHeatMapColor(float value);
+
+	static glm::vec3 getContourColor_d(float value);
 
 	static double get_triangle_area(const glm::vec2& pt1, const glm::vec2& pt2, const glm::vec2& pt3);
 
+	static double get_line_length(const glm::vec2& pt1, const glm::vec2& pt2);
+
 private:
+	static double HueToRGB(double v1, double v2, double vH);
 
 };
 
