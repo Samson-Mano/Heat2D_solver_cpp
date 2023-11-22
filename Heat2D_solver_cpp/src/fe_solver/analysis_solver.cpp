@@ -43,6 +43,10 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 		return;
 	}
 
+	// Create a file to keep track of matrices
+	std::ofstream output_file;
+	output_file.open("heat_analysis_results.txt");
+
 	//____________________________________________
 	Eigen::initParallel();  // Initialize Eigen's thread pool
 
@@ -165,6 +169,10 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 			elm_area,
 			Element_conduction_matrix);
 
+		// Print the Element Conduction Matrix
+		output_file << "Element Conduction Matrix " << std::endl;
+		output_file << Element_conduction_matrix << std::endl;
+		output_file << std::endl;
 
 		//________________________________________________________________________________________________
 		// Step 3: Create element convection matrix
@@ -173,6 +181,11 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 			elm_area,
 			elm_thickness,
 			element_convection_matrix);
+
+		// Print the Element Convection Matrix
+		output_file << "Element Convection Matrix " << std::endl;
+		output_file << element_convection_matrix << std::endl;
+		output_file << std::endl;
 
 
 		//________________________________________________________________________________________________
@@ -187,6 +200,11 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 			edg3_length,
 			elm_thickness,
 			element_edge_convection_matrix);
+
+		// Print the Element Edge Convection Matrix
+		output_file << "Element Edge Convection Matrix " << std::endl;
+		output_file << element_edge_convection_matrix << std::endl;
+		output_file << std::endl;
 
 
 		//________________________________________________________________________________________________
@@ -311,6 +329,24 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 	Eigen::SparseVector<double> global_spec_temp_matrix(numDOF); // Global Specified Temperature Matrix
 	global_spec_temp_matrix = -1.0 * (global_k_matrix * global_dof_matrix);
 
+	if (print_matrix == true)
+	{
+		// Print the Global K - Matrix
+		output_file << "Global K - Matrix " << std::endl;
+		output_file << global_k_matrix << std::endl;
+		output_file << std::endl;
+
+		// Print the Global F - Matrix
+		output_file << "Global F - Matrix " << std::endl;
+		output_file << global_f_matrix << std::endl;
+		output_file << std::endl;
+
+		// Print the Global DOF - Matrix
+		output_file << "Global DOF - Matrix " << std::endl;
+		output_file << global_dof_matrix << std::endl;
+		output_file << std::endl;
+
+	}
 
 	// Step 15: Apply Boundary condition (Create reduced global k & f matrix)
 	Eigen::SparseMatrix<double> reduced_global_k_matrix(reducedDOF, reducedDOF); // Reduced Global K Matrix
@@ -322,6 +358,21 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 		global_dof_matrix,
 		reduced_global_k_matrix,
 		reduced_global_f_matrix);
+
+	if (print_matrix == true)
+	{
+		// Print the Reduced Global K - Matrix
+		output_file << "Reduced Global K - Matrix " << std::endl;
+		output_file << reduced_global_k_matrix << std::endl;
+		output_file << std::endl;
+
+		// Print the Global F - Matrix
+		output_file << "Reduced Global F - Matrix " << std::endl;
+		output_file << reduced_global_f_matrix << std::endl;
+		output_file << std::endl;
+
+	}
+
 
 	stopwatch_elapsed_str.str("");
 	stopwatch_elapsed_str << stopwatch.elapsed();
@@ -361,6 +412,15 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 	set_global_T_matrix(reduced_global_T_matrix,
 		global_dof_matrix,
 		global_T_matrix);
+
+	if (print_matrix == true)
+	{
+		// Print the Global T - Matrix
+		output_file << "Global T - Matrix " << std::endl;
+		output_file << global_T_matrix << std::endl;
+		output_file << std::endl;
+
+	}
 
 	//________________________________________________________________________________________________________
 	//________________________________________________________________________________________________________
@@ -470,6 +530,10 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 	stopwatch_elapsed_str << stopwatch.elapsed();
 	std::cout << "Results mapping complete at = " << stopwatch_elapsed_str.str() << std::endl;
 
+	//____________________________________________________________________________________________________________________
+	stopwatch.stop();
+
+	output_file.close();
 }
 
 

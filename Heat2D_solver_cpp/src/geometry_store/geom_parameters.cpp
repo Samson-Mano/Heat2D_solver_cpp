@@ -285,7 +285,7 @@ double geom_parameters::get_triangle_area(const glm::vec2& pt1, const glm::vec2&
 	double y3 = static_cast<double>(pt3.y);
 
 	// Shoelace formula
-	double area = 0.5 * std::abs(x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2));
+	double area = 0.5 * (x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2));
 
 	return area;
 }
