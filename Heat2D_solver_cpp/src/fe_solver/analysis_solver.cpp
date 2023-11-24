@@ -95,9 +95,9 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 	// Set the number of DOF
 	numDOF = static_cast<int>(nodeid_map.size());
 
-	Eigen::SparseMatrix<double> global_k_matrix(numDOF, numDOF); // Global K Matrix
-	Eigen::SparseVector<double> global_f_matrix(numDOF); // Global F Matrix
-	Eigen::SparseVector<double> global_dof_matrix(numDOF); // Global DOF Matrix
+	Eigen::MatrixXd global_k_matrix(numDOF, numDOF); // Global K Matrix
+	Eigen::VectorXd global_f_matrix(numDOF); // Global F Matrix
+	Eigen::VectorXd global_dof_matrix(numDOF); // Global DOF Matrix
 
 	// Set zeros
 	global_k_matrix.setZero();
@@ -158,7 +158,8 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 
 		//________________________________________________________________________________________________
 		// Step 2: Create element conduction matrix
-		Eigen::SparseMatrix<double> Element_conduction_matrix(3, 3); // Element B matrix
+		Eigen::Matrix3d Element_conduction_matrix; // Element B matrix
+		Element_conduction_matrix.setZero();
 
 		get_element_conduction_matrix(elm.nd1->node_pt,
 			elm.nd2->node_pt,
@@ -169,29 +170,22 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 			elm_area,
 			Element_conduction_matrix);
 
-		// Print the Element Conduction Matrix
-		output_file << "Element Conduction Matrix " << std::endl;
-		output_file << Element_conduction_matrix << std::endl;
-		output_file << std::endl;
-
 		//________________________________________________________________________________________________
 		// Step 3: Create element convection matrix
-		Eigen::SparseMatrix<double> element_convection_matrix(3, 3); // Element Convection matrix
+		Eigen::Matrix3d element_convection_matrix; // Element Convection matrix
+		element_convection_matrix.setZero();
+
 		get_element_convection_matrix(element_constraints[elm_id].heat_transfer_coeff_h,
 			elm_area,
 			elm_thickness,
 			element_convection_matrix);
 
-		// Print the Element Convection Matrix
-		output_file << "Element Convection Matrix " << std::endl;
-		output_file << element_convection_matrix << std::endl;
-		output_file << std::endl;
-
-
 		//________________________________________________________________________________________________
 		// Step 4: Create element heat convection due to edge exposed to ambient temperature 
 		// (internal edges shouldn't have convection (user caution is required))
-		Eigen::SparseMatrix<double> element_edge_convection_matrix(3, 3); // Element Edge Convection matrix
+		Eigen::Matrix3d element_edge_convection_matrix; // Element Edge Convection matrix
+		element_edge_convection_matrix.setZero();
+
 		get_element_edge_heat_convection_matrix(edge_constraints[edg1_id].heat_transfer_coeff_h,
 			edge_constraints[edg2_id].heat_transfer_coeff_h,
 			edge_constraints[edg3_id].heat_transfer_coeff_h,
@@ -201,15 +195,11 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 			elm_thickness,
 			element_edge_convection_matrix);
 
-		// Print the Element Edge Convection Matrix
-		output_file << "Element Edge Convection Matrix " << std::endl;
-		output_file << element_edge_convection_matrix << std::endl;
-		output_file << std::endl;
-
-
 		//________________________________________________________________________________________________
 		// Step 5: Create element ambient temperature matrix
-		Eigen::SparseVector<double> element_ambient_temp_matrix(3); // Element Ambient Temperature matrix
+		Eigen::Vector3d element_ambient_temp_matrix; // Element Ambient Temperature matrix
+		element_ambient_temp_matrix.setZero();
+
 		get_element_ambient_temp_matrix(element_constraints[elm_id].heat_transfer_coeff_h,
 			elm_area,
 			elm_thickness,
@@ -219,7 +209,9 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 
 		//________________________________________________________________________________________________
 		// Step 6: Create element heat source matrix
-		Eigen::SparseVector<double> element_heat_source_matrix(3); // Element Heat Source matrix
+		Eigen::Vector3d element_heat_source_matrix; // Element Heat Source matrix
+		element_heat_source_matrix.setZero();
+
 		get_element_heat_source_matrix(element_constraints[elm_id].heat_source_q,
 			elm_area,
 			elm_thickness,
@@ -230,7 +222,9 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 		//_____________________________Element matrices End_______________________________________________
 		//________________________________________________________________________________________________
 		// Step 7: Create edge heat source matrix
-		Eigen::SparseVector<double> edge_heat_source_matrix(3); // Edge Heat Source matrix
+		Eigen::Vector3d edge_heat_source_matrix; // Edge Heat Source matrix
+		edge_heat_source_matrix.setZero();
+
 		get_edge_heatsource_matrix(edge_constraints[edg1_id].heat_source_q,
 			edge_constraints[edg2_id].heat_source_q,
 			edge_constraints[edg3_id].heat_source_q,
@@ -242,7 +236,9 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 
 
 		// Step 8: Create edge heat convection matrix
-		Eigen::SparseVector<double> edge_heat_convection_matrix(3); // Edge Heat Convection matrix
+		Eigen::Vector3d edge_heat_convection_matrix; // Edge Heat Convection matrix
+		edge_heat_convection_matrix.setZero();
+
 		get_edge_heatconvection_matrix(edge_constraints[edg1_id].heat_transfer_coeff_h,
 			edge_constraints[edg2_id].heat_transfer_coeff_h,
 			edge_constraints[edg3_id].heat_transfer_coeff_h,
@@ -257,7 +253,9 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 
 
 		// Step 9: Create edge specified temperature matrix
-		Eigen::SparseVector<double> edge_spec_temp_matrix(3); // Edge Specified Temperature matrix
+		Eigen::Vector3d edge_spec_temp_matrix; // Edge Specified Temperature matrix
+		edge_spec_temp_matrix.setZero();
+
 		get_edge_spectemp_matrix(edge_constraints[edg1_id].specified_temperature_T,
 			edge_constraints[edg2_id].specified_temperature_T,
 			edge_constraints[edg3_id].specified_temperature_T,
@@ -267,19 +265,19 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 		//_____________________________Edge matrices End__________________________________________________
 		//________________________________________________________________________________________________
 		// Step 10: Create element k matrix
-		Eigen::SparseMatrix<double> element_k_matrix(3, 3); // Element K - Matrix
+		Eigen::Matrix3d element_k_matrix; // Element K - Matrix
 
 		element_k_matrix = Element_conduction_matrix - element_convection_matrix + element_edge_convection_matrix;
 
 
 		// Step 11: Create element f matrix
-		Eigen::SparseVector<double> element_f_matrix(3); // Element F - Matrix
+		Eigen::Vector3d element_f_matrix; // Element F - Matrix
 
 		element_f_matrix = element_ambient_temp_matrix + element_heat_source_matrix + edge_heat_source_matrix + edge_heat_convection_matrix;
 
 
 		// Step 12: Create element DOF matrix
-		Eigen::SparseVector<double> element_dof_matrix(3); // Element dof - Matrix
+		Eigen::Vector3d element_dof_matrix; // Element dof - Matrix
 
 		element_dof_matrix = edge_spec_temp_matrix;
 
@@ -298,6 +296,11 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 			global_f_matrix,
 			global_dof_matrix);
 
+
+		// Print the Element F  Matrix
+		output_file << "Element F  Matrix " << std::endl;
+		output_file << element_f_matrix << std::endl;
+		output_file << std::endl;
 	}
 
 	stopwatch_elapsed_str.str("");
@@ -326,7 +329,7 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 	}
 
 	// Applying specified temerature as source
-	Eigen::SparseVector<double> global_spec_temp_matrix(numDOF); // Global Specified Temperature Matrix
+	Eigen::VectorXd global_spec_temp_matrix(numDOF); // Global Specified Temperature Matrix
 	global_spec_temp_matrix = -1.0 * (global_k_matrix * global_dof_matrix);
 
 	if (print_matrix == true)
@@ -407,7 +410,7 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 	}
 
 	// Step 17: Create the global temperature value
-	Eigen::SparseVector<double> global_T_matrix(numDOF); // Global T Matrix
+	Eigen::VectorXd global_T_matrix(numDOF); // Global T Matrix
 
 	set_global_T_matrix(reduced_global_T_matrix,
 		global_dof_matrix,
@@ -692,7 +695,7 @@ void analysis_solver::get_element_conduction_matrix(const glm::vec2& node_pt1,
 	const double& elm_ky,
 	const double& elm_thickness,
 	const double& elm_area,
-	Eigen::SparseMatrix<double>& Element_conduction_matrix)
+	Eigen::Matrix3d& Element_conduction_matrix)
 {
 	// Step: 1 Create the linear shape function parameters
 	double  b_i, c_i, b_j, c_j, b_k, c_k;
@@ -706,30 +709,30 @@ void analysis_solver::get_element_conduction_matrix(const glm::vec2& node_pt1,
 	c_k = node_pt2.x - node_pt1.x; // xj - xi
 
 	// Step: 1A Create the B_matrix of linear triangle
-	Eigen::SparseMatrix<double> B_matrix(2, 3); // Element B matrix
+	Eigen::MatrixXd B_matrix(2, 3); // Element B matrix
 
 	double const1 = (1.0 / (2.0 * elm_area));
 
 	// Set coefficients for row 1
-	B_matrix.insert(0, 0) = const1 * b_i;
-	B_matrix.insert(0, 1) = const1 * b_j;
-	B_matrix.insert(0, 2) = const1 * b_k;
+	B_matrix.coeffRef(0, 0) = const1 * b_i;
+	B_matrix.coeffRef(0, 1) = const1 * b_j;
+	B_matrix.coeffRef(0, 2) = const1 * b_k;
 
 	// Set coefficients for row 2
-	B_matrix.insert(1, 0) = const1 * c_i;
-	B_matrix.insert(1, 1) = const1 * c_j;
-	B_matrix.insert(1, 2) = const1 * c_k;
+	B_matrix.coeffRef(1, 0) = const1 * c_i;
+	B_matrix.coeffRef(1, 1) = const1 * c_j;
+	B_matrix.coeffRef(1, 2) = const1 * c_k;
 
 	//________________________________________________________________________________________________
 	// Step 2: Create element conduction matrix
-	Eigen::SparseMatrix<double> D_matrix(2, 2); // Element D matrix
+	Eigen::MatrixXd D_matrix(2, 2); // Element D matrix
 
 	// Set the D-matrix
-	D_matrix.insert(0, 0) = elm_kx;
-	D_matrix.insert(0, 1) = 0.0;
+	D_matrix.coeffRef(0, 0) = elm_kx;
+	D_matrix.coeffRef(0, 1) = 0.0;
 
-	D_matrix.insert(1, 0) = 0.0;
-	D_matrix.insert(1, 1) = elm_ky;
+	D_matrix.coeffRef(1, 0) = 0.0;
+	D_matrix.coeffRef(1, 1) = elm_ky;
 
 	double elm_volume = elm_area * elm_thickness;
 
@@ -741,24 +744,24 @@ void analysis_solver::get_element_conduction_matrix(const glm::vec2& node_pt1,
 void analysis_solver::get_element_convection_matrix(const double& elm_heat_transfer_coeff,
 	const double& elm_area,
 	const double& elm_thickness,
-	Eigen::SparseMatrix<double>& element_convection_matrix)
+	Eigen::Matrix3d& element_convection_matrix)
 {
 	double const2 = (-2.0 * elm_heat_transfer_coeff * elm_area) / (12.0 * elm_thickness);
 
 	// Set coefficients for row 1
-	element_convection_matrix.insert(0, 0) = const2 * 2.0;
-	element_convection_matrix.insert(0, 1) = const2 * 1.0;
-	element_convection_matrix.insert(0, 2) = const2 * 1.0;
+	element_convection_matrix.coeffRef(0, 0) = const2 * 2.0;
+	element_convection_matrix.coeffRef(0, 1) = const2 * 1.0;
+	element_convection_matrix.coeffRef(0, 2) = const2 * 1.0;
 
 	// Set coefficients for row 2
-	element_convection_matrix.insert(1, 0) = const2 * 1.0;
-	element_convection_matrix.insert(1, 1) = const2 * 2.0;
-	element_convection_matrix.insert(1, 2) = const2 * 1.0;
+	element_convection_matrix.coeffRef(1, 0) = const2 * 1.0;
+	element_convection_matrix.coeffRef(1, 1) = const2 * 2.0;
+	element_convection_matrix.coeffRef(1, 2) = const2 * 1.0;
 
 	// Set coefficients for row 3
-	element_convection_matrix.insert(2, 0) = const2 * 1.0;
-	element_convection_matrix.insert(2, 1) = const2 * 1.0;
-	element_convection_matrix.insert(2, 2) = const2 * 2.0;
+	element_convection_matrix.coeffRef(2, 0) = const2 * 1.0;
+	element_convection_matrix.coeffRef(2, 1) = const2 * 1.0;
+	element_convection_matrix.coeffRef(2, 2) = const2 * 2.0;
 
 }
 
@@ -770,64 +773,64 @@ void analysis_solver::get_element_edge_heat_convection_matrix(const double& edg1
 	const double& edg2_length,
 	const double& edg3_length,
 	const double& elm_thickness,
-	Eigen::SparseMatrix<double>& element_edge_convection_matrix)
+	Eigen::Matrix3d& element_edge_convection_matrix)
 {
 	// Step 4A: Element convection due to edge i-j convection
 	double const3_1 = (edg1_heattransfer_co_eff * edg1_length * elm_thickness) / 6.0;
-	Eigen::SparseMatrix<double> element_edge_ij_convection_matrix(3, 3); // Element Edge ij Convection matrix
+	Eigen::Matrix3d element_edge_ij_convection_matrix; // Element Edge ij Convection matrix
 
 	// Set coefficients for row 1
-	element_edge_ij_convection_matrix.insert(0, 0) = const3_1 * 2.0;
-	element_edge_ij_convection_matrix.insert(0, 1) = const3_1 * 1.0;
-	element_edge_ij_convection_matrix.insert(0, 2) = 0.0;
+	element_edge_ij_convection_matrix.coeffRef(0, 0) = const3_1 * 2.0;
+	element_edge_ij_convection_matrix.coeffRef(0, 1) = const3_1 * 1.0;
+	element_edge_ij_convection_matrix.coeffRef(0, 2) = 0.0;
 
 	// Set coefficients for row 2
-	element_edge_ij_convection_matrix.insert(1, 0) = const3_1 * 1.0;
-	element_edge_ij_convection_matrix.insert(1, 1) = const3_1 * 2.0;
-	element_edge_ij_convection_matrix.insert(1, 2) = 0.0;
+	element_edge_ij_convection_matrix.coeffRef(1, 0) = const3_1 * 1.0;
+	element_edge_ij_convection_matrix.coeffRef(1, 1) = const3_1 * 2.0;
+	element_edge_ij_convection_matrix.coeffRef(1, 2) = 0.0;
 
 	// Set coefficients for row 3
-	element_edge_ij_convection_matrix.insert(2, 0) = 0.0;
-	element_edge_ij_convection_matrix.insert(2, 1) = 0.0;
-	element_edge_ij_convection_matrix.insert(2, 2) = 0.0;
+	element_edge_ij_convection_matrix.coeffRef(2, 0) = 0.0;
+	element_edge_ij_convection_matrix.coeffRef(2, 1) = 0.0;
+	element_edge_ij_convection_matrix.coeffRef(2, 2) = 0.0;
 
 	// Step 4B: Element convection due to edge j-k convection
 	double const3_2 = (edg2_heattransfer_co_eff * edg2_length * elm_thickness) / 6.0;
-	Eigen::SparseMatrix<double> element_edge_jk_convection_matrix(3, 3); // Element Edge jk Convection matrix
+	Eigen::Matrix3d element_edge_jk_convection_matrix; // Element Edge jk Convection matrix
 
 	// Set coefficients for row 1
-	element_edge_jk_convection_matrix.insert(0, 0) = 0.0;
-	element_edge_jk_convection_matrix.insert(0, 1) = 0.0;
-	element_edge_jk_convection_matrix.insert(0, 2) = 0.0;
+	element_edge_jk_convection_matrix.coeffRef(0, 0) = 0.0;
+	element_edge_jk_convection_matrix.coeffRef(0, 1) = 0.0;
+	element_edge_jk_convection_matrix.coeffRef(0, 2) = 0.0;
 
 	// Set coefficients for row 2
-	element_edge_jk_convection_matrix.insert(1, 0) = 0.0;
-	element_edge_jk_convection_matrix.insert(1, 1) = const3_2 * 2.0;
-	element_edge_jk_convection_matrix.insert(1, 2) = const3_2 * 1.0;
+	element_edge_jk_convection_matrix.coeffRef(1, 0) = 0.0;
+	element_edge_jk_convection_matrix.coeffRef(1, 1) = const3_2 * 2.0;
+	element_edge_jk_convection_matrix.coeffRef(1, 2) = const3_2 * 1.0;
 
 	// Set coefficients for row 3
-	element_edge_jk_convection_matrix.insert(2, 0) = 0.0;
-	element_edge_jk_convection_matrix.insert(2, 1) = const3_2 * 1.0;
-	element_edge_jk_convection_matrix.insert(2, 2) = const3_2 * 2.0;
+	element_edge_jk_convection_matrix.coeffRef(2, 0) = 0.0;
+	element_edge_jk_convection_matrix.coeffRef(2, 1) = const3_2 * 1.0;
+	element_edge_jk_convection_matrix.coeffRef(2, 2) = const3_2 * 2.0;
 
 	// Step 4B: Element convection due to edge k-i convection
 	double const3_3 = (edg3_heattransfer_co_eff * edg3_length * elm_thickness) / 6.0;
-	Eigen::SparseMatrix<double> element_edge_ki_convection_matrix(3, 3); // Element Edge ki Convection matrix
+	Eigen::Matrix3d element_edge_ki_convection_matrix; // Element Edge ki Convection matrix
 
 	// Set coefficients for row 1
-	element_edge_ki_convection_matrix.insert(0, 0) = const3_3 * 2.0;
-	element_edge_ki_convection_matrix.insert(0, 1) = 0.0;
-	element_edge_ki_convection_matrix.insert(0, 2) = const3_3 * 1.0;
+	element_edge_ki_convection_matrix.coeffRef(0, 0) = const3_3 * 2.0;
+	element_edge_ki_convection_matrix.coeffRef(0, 1) = 0.0;
+	element_edge_ki_convection_matrix.coeffRef(0, 2) = const3_3 * 1.0;
 
 	// Set coefficients for row 2
-	element_edge_ki_convection_matrix.insert(1, 0) = 0.0;
-	element_edge_ki_convection_matrix.insert(1, 1) = 0.0;
-	element_edge_ki_convection_matrix.insert(1, 2) = 0.0;
+	element_edge_ki_convection_matrix.coeffRef(1, 0) = 0.0;
+	element_edge_ki_convection_matrix.coeffRef(1, 1) = 0.0;
+	element_edge_ki_convection_matrix.coeffRef(1, 2) = 0.0;
 
 	// Set coefficients for row 3
-	element_edge_ki_convection_matrix.insert(2, 0) = const3_3 * 1.0;
-	element_edge_ki_convection_matrix.insert(2, 1) = 0.0;
-	element_edge_ki_convection_matrix.insert(2, 2) = const3_3 * 2.0;
+	element_edge_ki_convection_matrix.coeffRef(2, 0) = const3_3 * 1.0;
+	element_edge_ki_convection_matrix.coeffRef(2, 1) = 0.0;
+	element_edge_ki_convection_matrix.coeffRef(2, 2) = const3_3 * 2.0;
 
 
 	// Add the edge convection matrix
@@ -840,15 +843,15 @@ void analysis_solver::get_element_ambient_temp_matrix(const double& elm_heat_tra
 	const double& elm_area,
 	const double& elm_thickness,
 	const double& elm_ambient_temp,
-	Eigen::SparseVector<double>& element_ambient_temp_matrix)
+	Eigen::Vector3d& element_ambient_temp_matrix)
 {
 	// Get element heat convection due to ambient temperature (1D matrix)
 	double const1 = (-2.0 * elm_heat_transfer_coeff * elm_ambient_temp * elm_area) / (3.0 * elm_thickness);
 
 	// Set coefficients for row 1
-	element_ambient_temp_matrix.insert(0) = const1 * 1.0;
-	element_ambient_temp_matrix.insert(1) = const1 * 1.0;
-	element_ambient_temp_matrix.insert(2) = const1 * 1.0;
+	element_ambient_temp_matrix.coeffRef(0) = const1 * 1.0;
+	element_ambient_temp_matrix.coeffRef(1) = const1 * 1.0;
+	element_ambient_temp_matrix.coeffRef(2) = const1 * 1.0;
 
 }
 
@@ -856,15 +859,15 @@ void analysis_solver::get_element_ambient_temp_matrix(const double& elm_heat_tra
 void analysis_solver::get_element_heat_source_matrix(const double& elm_heat_source,
 	const double& elm_area,
 	const double& elm_thickness,
-	Eigen::SparseVector<double>& element_heat_source_matrix)
+	Eigen::Vector3d& element_heat_source_matrix)
 {
 	// Get element heat source matrix (1D matrix)
 	double const1 = (elm_heat_source * elm_area * elm_thickness) / 3.0;
 
 	// Set coefficients for row 1
-	element_heat_source_matrix.insert(0) = const1 * 1.0;
-	element_heat_source_matrix.insert(1) = const1 * 1.0;
-	element_heat_source_matrix.insert(2) = const1 * 1.0;
+	element_heat_source_matrix.coeffRef(0) = const1 * 1.0;
+	element_heat_source_matrix.coeffRef(1) = const1 * 1.0;
+	element_heat_source_matrix.coeffRef(2) = const1 * 1.0;
 }
 
 
@@ -876,37 +879,37 @@ void analysis_solver::get_edge_heatsource_matrix(const double& edg1_heatsource,
 	const double& edg2_length,
 	const double& edg3_length,
 	const double& elm_thickness,
-	Eigen::SparseVector<double>& edge_heatsource_matrix)
+	Eigen::Vector3d& edge_heatsource_matrix)
 {
 	// edge heat source matrix
 	// edge heat soure due to edge i-j source
 	double const_1 = (edg1_heatsource * edg1_length * elm_thickness) / 2.0;
-	Eigen::SparseVector<double> edge_ij_heatsource_matrix(3); // Edge ij Heat Source matrix
+	Eigen::Vector3d edge_ij_heatsource_matrix; // Edge ij Heat Source matrix
 
 	// Set coefficients for row 1
-	edge_ij_heatsource_matrix.insert(0) = const_1 * 1.0;
-	edge_ij_heatsource_matrix.insert(1) = const_1 * 1.0;
-	edge_ij_heatsource_matrix.insert(2) = 0.0;
+	edge_ij_heatsource_matrix.coeffRef(0) = const_1 * 1.0;
+	edge_ij_heatsource_matrix.coeffRef(1) = const_1 * 1.0;
+	edge_ij_heatsource_matrix.coeffRef(2) = 0.0;
 
 
 	// edge heat soure due to edge j-k source
 	double const_2 = (edg2_heatsource * edg2_length * elm_thickness) / 2.0;
-	Eigen::SparseVector<double> edge_jk_heatsource_matrix(3); // Edge jk Heat Source matrix
+	Eigen::Vector3d edge_jk_heatsource_matrix; // Edge jk Heat Source matrix
 
 	// Set coefficients for row 1
-	edge_jk_heatsource_matrix.insert(0) = 0.0;
-	edge_jk_heatsource_matrix.insert(1) = const_2 * 1.0;
-	edge_jk_heatsource_matrix.insert(2) = const_2 * 1.0;
+	edge_jk_heatsource_matrix.coeffRef(0) = 0.0;
+	edge_jk_heatsource_matrix.coeffRef(1) = const_2 * 1.0;
+	edge_jk_heatsource_matrix.coeffRef(2) = const_2 * 1.0;
 
 
 	// edge heat soure due to edge k-i source
 	double const_3 = (edg3_heatsource * edg3_length * elm_thickness) / 2.0;
-	Eigen::SparseVector<double> edge_ki_heatsource_matrix(3); // Edge ki Heat Source matrix
+	Eigen::Vector3d edge_ki_heatsource_matrix; // Edge ki Heat Source matrix
 
 	// Set coefficients for row 1
-	edge_jk_heatsource_matrix.insert(0) = const_3 * 1.0;
-	edge_jk_heatsource_matrix.insert(1) = 0.0;
-	edge_jk_heatsource_matrix.insert(2) = const_3 * 1.0;
+	edge_ki_heatsource_matrix.coeffRef(0) = const_3 * 1.0;
+	edge_ki_heatsource_matrix.coeffRef(1) = 0.0;
+	edge_ki_heatsource_matrix.coeffRef(2) = const_3 * 1.0;
 
 	edge_heatsource_matrix = edge_ij_heatsource_matrix + edge_jk_heatsource_matrix + edge_ki_heatsource_matrix;
 
@@ -923,37 +926,37 @@ void analysis_solver::get_edge_heatconvection_matrix(const double& edg1_heattran
 	const double& edg2_length,
 	const double& edg3_length,
 	const double& elm_thickness,
-	Eigen::SparseVector<double>& edge_heatconvection_matrix)
+	Eigen::Vector3d& edge_heatconvection_matrix)
 {
 	// edge heat convection matrix
 	// edge heat convection due to edge i-j ambient temperature
 	double const_1 = (edg1_heattransfer_coeff * edg1_ambient_temp * edg1_length * elm_thickness) / 2.0;
-	Eigen::SparseVector<double> edge_ij_heatconvection_matrix(3); // Edge ij Heat Convection matrix
+	Eigen::Vector3d edge_ij_heatconvection_matrix; // Edge ij Heat Convection matrix
 
 	// Set coefficients for row 1
-	edge_ij_heatconvection_matrix.insert(0) = const_1 * 1.0;
-	edge_ij_heatconvection_matrix.insert(1) = const_1 * 1.0;
-	edge_ij_heatconvection_matrix.insert(2) = 0.0;
+	edge_ij_heatconvection_matrix.coeffRef(0) = const_1 * 1.0;
+	edge_ij_heatconvection_matrix.coeffRef(1) = const_1 * 1.0;
+	edge_ij_heatconvection_matrix.coeffRef(2) = 0.0;
 
 
 	// edge heat convection due to edge j-k ambient temperature
 	double const_2 = (edg2_heattransfer_coeff * edg2_ambient_temp * edg2_length * elm_thickness) / 2.0;
-	Eigen::SparseVector<double> edge_jk_heatconvection_matrix(3); // Edge jk Heat Convection matrix
+	Eigen::Vector3d edge_jk_heatconvection_matrix; // Edge jk Heat Convection matrix
 
 	// Set coefficients for row 1
-	edge_jk_heatconvection_matrix.insert(0) = 0.0;
-	edge_jk_heatconvection_matrix.insert(1) = const_2 * 1.0;
-	edge_jk_heatconvection_matrix.insert(2) = const_2 * 1.0;
+	edge_jk_heatconvection_matrix.coeffRef(0) = 0.0;
+	edge_jk_heatconvection_matrix.coeffRef(1) = const_2 * 1.0;
+	edge_jk_heatconvection_matrix.coeffRef(2) = const_2 * 1.0;
 
 
 	// edge heat convection due to edge k-i ambient temperature
 	double const_3 = (edg3_heattransfer_coeff * edg3_ambient_temp * edg3_length * elm_thickness) / 2.0;
-	Eigen::SparseVector<double> edge_ki_heatconvection_matrix(3); // Edge ki Heat Convection matrix
+	Eigen::Vector3d edge_ki_heatconvection_matrix; // Edge ki Heat Convection matrix
 
 	// Set coefficients for row 1
-	edge_ki_heatconvection_matrix.insert(0) = const_3 * 1.0;
-	edge_ki_heatconvection_matrix.insert(1) = 0.0;
-	edge_ki_heatconvection_matrix.insert(2) = const_3 * 1.0;
+	edge_ki_heatconvection_matrix.coeffRef(0) = const_3 * 1.0;
+	edge_ki_heatconvection_matrix.coeffRef(1) = 0.0;
+	edge_ki_heatconvection_matrix.coeffRef(2) = const_3 * 1.0;
 
 	edge_heatconvection_matrix = edge_ij_heatconvection_matrix + edge_jk_heatconvection_matrix + edge_ki_heatconvection_matrix;
 
@@ -964,37 +967,37 @@ void analysis_solver::get_edge_heatconvection_matrix(const double& edg1_heattran
 void analysis_solver::get_edge_spectemp_matrix(const double& edg1_spectemp,
 	const double& edg2_spectemp,
 	const double& edg3_spectemp,
-	Eigen::SparseVector<double>& edge_spec_temp_matrix)
+	Eigen::Vector3d& edge_spec_temp_matrix)
 {
 	// edge specified temperature matrix
 	// edge i-j specified temperature
 	double const_1 = edg1_spectemp / 2.0;
-	Eigen::SparseVector<double> edge_ij_spec_temp_matrix(3); // Edge ij Specified temperature matrix
+	Eigen::Vector3d edge_ij_spec_temp_matrix; // Edge ij Specified temperature matrix
 
 	// Set coefficients for row 1
-	edge_ij_spec_temp_matrix.insert(0) = const_1 * 1.0;
-	edge_ij_spec_temp_matrix.insert(1) = const_1 * 1.0;
-	edge_ij_spec_temp_matrix.insert(2) = 0.0;
+	edge_ij_spec_temp_matrix.coeffRef(0) = const_1 * 1.0;
+	edge_ij_spec_temp_matrix.coeffRef(1) = const_1 * 1.0;
+	edge_ij_spec_temp_matrix.coeffRef(2) = 0.0;
 
 
 	// edge j-k specified temperature
 	double const_2 = edg2_spectemp / 2.0;
-	Eigen::SparseVector<double> edge_jk_spec_temp_matrix(3); // Edge jk Specified temperature matrix
+	Eigen::Vector3d edge_jk_spec_temp_matrix; // Edge jk Specified temperature matrix
 
 	// Set coefficients for row 1
-	edge_jk_spec_temp_matrix.insert(0) = 0.0;
-	edge_jk_spec_temp_matrix.insert(1) = const_2 * 1.0;
-	edge_jk_spec_temp_matrix.insert(2) = const_2 * 1.0;
+	edge_jk_spec_temp_matrix.coeffRef(0) = 0.0;
+	edge_jk_spec_temp_matrix.coeffRef(1) = const_2 * 1.0;
+	edge_jk_spec_temp_matrix.coeffRef(2) = const_2 * 1.0;
 
 
 	// edge k-i specified temperature
 	double const_3 = edg3_spectemp / 2.0;
-	Eigen::SparseVector<double> edge_ki_spec_temp_matrix(3); // Edge ki Specified temperature matrix
+	Eigen::Vector3d edge_ki_spec_temp_matrix; // Edge ki Specified temperature matrix
 
 	// Set coefficients for row 1
-	edge_ki_spec_temp_matrix.insert(0) = const_3 * 1.0;
-	edge_ki_spec_temp_matrix.insert(1) = 0.0;
-	edge_ki_spec_temp_matrix.insert(2) = const_3 * 1.0;
+	edge_ki_spec_temp_matrix.coeffRef(0) = const_3 * 1.0;
+	edge_ki_spec_temp_matrix.coeffRef(1) = 0.0;
+	edge_ki_spec_temp_matrix.coeffRef(2) = const_3 * 1.0;
 
 	edge_spec_temp_matrix = edge_ij_spec_temp_matrix + edge_jk_spec_temp_matrix + edge_ki_spec_temp_matrix;
 
@@ -1002,13 +1005,13 @@ void analysis_solver::get_edge_spectemp_matrix(const double& edg1_spectemp,
 
 
 
-void analysis_solver::set_global_matrices(const Eigen::SparseMatrix<double>& element_k_matrix, 
-	const Eigen::SparseVector<double>& element_f_matrix, 
-	const Eigen::SparseVector<double>& element_dof_matrix, 
+void analysis_solver::set_global_matrices(const Eigen::Matrix3d& element_k_matrix, 
+	const Eigen::Vector3d& element_f_matrix, 
+	const Eigen::Vector3d& element_dof_matrix, 
 	const int& nd1_id, const int& nd2_id, const int& nd3_id, 
-	Eigen::SparseMatrix<double>& global_k_matrix, 
-	Eigen::SparseVector<double>& global_f_matrix, 
-	Eigen::SparseVector<double>& global_dof_matrix)
+	Eigen::MatrixXd& global_k_matrix, 
+	Eigen::VectorXd& global_f_matrix, 
+	Eigen::VectorXd& global_dof_matrix)
 {
 	// Global K Matrix
 	// Set the row 1
@@ -1041,11 +1044,12 @@ void analysis_solver::set_global_matrices(const Eigen::SparseMatrix<double>& ele
 
 }
 
-void analysis_solver::get_reduced_global_matrices(const Eigen::SparseMatrix<double>& global_k_matrix, 
-	const Eigen::SparseVector<double>& global_f_matrix, 
-	const Eigen::SparseVector<double>& global_spec_temp_matrix, 
-	const Eigen::SparseVector<double>& global_dof_matrix, 
-	Eigen::SparseMatrix<double>& reduced_global_k_matrix, Eigen::SparseVector<double>& reduced_global_f_matrix)
+void analysis_solver::get_reduced_global_matrices(const Eigen::MatrixXd& global_k_matrix,
+	const Eigen::VectorXd& global_f_matrix,
+	const Eigen::VectorXd& global_spec_temp_matrix,
+	const Eigen::VectorXd& global_dof_matrix,
+	Eigen::SparseMatrix<double>& reduced_global_k_matrix,
+	Eigen::SparseVector<double>& reduced_global_f_matrix)
 {
 	int r = 0, s = 0;
 	for (int i = 0; i < numDOF; i++)
@@ -1080,9 +1084,9 @@ void analysis_solver::get_reduced_global_matrices(const Eigen::SparseMatrix<doub
 
 }
 
-void analysis_solver::set_global_T_matrix(const Eigen::SparseVector<double>& reduced_global_T_matrix, 
-	const Eigen::SparseVector<double>& global_dof_matrix, 
-	Eigen::SparseVector<double>& global_T_matrix)
+void analysis_solver::set_global_T_matrix(const Eigen::SparseVector<double>& reduced_global_T_matrix,
+	const Eigen::VectorXd& global_dof_matrix,
+	Eigen::VectorXd& global_T_matrix)
 {
 	// Create global t matrix from the reduced global t matrix
 	int r = 0;
