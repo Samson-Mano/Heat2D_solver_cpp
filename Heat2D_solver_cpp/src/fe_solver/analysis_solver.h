@@ -55,7 +55,7 @@ class analysis_solver
 public:
 	const double m_pi = 3.14159265358979323846;
 	const double epsilon = 0.000001;
-	bool print_matrix = true;
+	bool print_matrix = false;
 	Stopwatch_events stopwatch;
 
 	analysis_solver();

@@ -296,11 +296,6 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 			global_f_matrix,
 			global_dof_matrix);
 
-
-		// Print the Element F  Matrix
-		output_file << "Element F  Matrix " << std::endl;
-		output_file << element_f_matrix << std::endl;
-		output_file << std::endl;
 	}
 
 	stopwatch_elapsed_str.str("");
@@ -528,6 +523,7 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 
 	}
 
+	model_contourresults.set_contour_lines(); // Set the contour lines
 
 	stopwatch_elapsed_str.str("");
 	stopwatch_elapsed_str << stopwatch.elapsed();

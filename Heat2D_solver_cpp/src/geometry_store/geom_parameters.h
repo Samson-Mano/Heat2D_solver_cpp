@@ -102,6 +102,9 @@ public:
 
 	static double get_line_length(const glm::vec2& pt1, const glm::vec2& pt2);
 
+	static glm::vec2 calculateCatmullRomPoint(const std::vector<glm::vec2>& controlPoints, float t);
+
+
 private:
 	static double HueToRGB(double v1, double v2, double vH);
 

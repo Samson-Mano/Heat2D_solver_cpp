@@ -298,6 +298,28 @@ double geom_parameters::get_line_length(const glm::vec2& pt1, const glm::vec2& p
 	return length;
 }
 
+
+glm::vec2 geom_parameters::calculateCatmullRomPoint(const std::vector<glm::vec2>& controlPoints, float t)
+{
+	// Function to calculate a point on a Catmull-Rom spline
+	int n = static_cast<int>(controlPoints.size()) - 1;
+	int i = static_cast<int>(t * n);
+	t = t * n - i;
+
+	glm::vec2 p0 = i > 0 ? controlPoints[i - 1] : controlPoints[0];
+	glm::vec2 p1 = controlPoints[i];
+	glm::vec2 p2 = controlPoints[i + 1];
+	glm::vec2 p3 = (i + 2 < n) ? controlPoints[i + 2] : controlPoints[n];
+
+	return 0.5f * (
+		(-p0 + 3.0f * p1 - 3.0f * p2 + p3) * (t * t * t) +
+		(2.0f * p0 - 5.0f * p1 + 4.0f * p2 - p3) * (t * t) +
+		(-p0 + p2) * t +
+		2.0f * p1
+		);
+}
+
+
 // Stop watch
 void Stopwatch::reset_time()
 {

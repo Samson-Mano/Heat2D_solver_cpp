@@ -25,7 +25,7 @@ void analysis_window::render_window()
 	if (is_show_window == false)
 		return;
 
-	ImGui::Begin("Wave Equation Solver");
+	ImGui::Begin("Heat Equation Solver");
 
 	//_________________________________________________________________________________________
 	// Add a Analysis button
@@ -54,6 +54,34 @@ void analysis_window::render_window()
 		is_show_window = false; // set the flag to close the window
 	}
 
+	// Example values
+	float minValue = contour_minvalue;
+	float maxValue = contour_maxvalue;
+	int numLevels = 5;
+
+	// Show contour bars in the ImGui window
+	ImGui::Text("Contour Bars");
+
+	// Plot the contour bars
+	if (ImPlot::BeginPlot("ContourBars", nullptr, nullptr, ImVec2(-1, 150)))
+	{
+		ImPlot::SetNextPlotLimitsY(minValue, maxValue);
+		for (int i = 0; i < numLevels; ++i)
+		{
+			float levelValue = minValue + static_cast<float>(i) / (numLevels - 1) * (maxValue - minValue);
+			ImPlot::PlotBars("", &levelValue, 1, 0.1f);
+		}
+		ImPlot::EndPlot();
+	}
+
 	ImGui::End();
 
 }
+
+void analysis_window::set_maxmin(const double& contour_maxvalue, const double& contour_minvalue)
+{
+	// Set the contour maximum and minimum
+	this->contour_maxvalue = contour_maxvalue;
+	this->contour_minvalue = contour_minvalue;
+}
+

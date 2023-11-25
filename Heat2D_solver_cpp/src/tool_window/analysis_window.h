@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include "../ImGui/imgui.h"
+#include "../ImGui/implot.h"
 #include "../ImGui/imgui_impl_glfw.h"
 #include "../ImGui/imgui_impl_opengl3.h"
 #include "../geometry_store/geom_parameters.h"
@@ -23,6 +24,8 @@ public:
 	~analysis_window();
 	void init();
 	void render_window();
+	void set_maxmin(const double& contour_maxvalue, const double& contour_minvalue);
 private:
-
+	double contour_maxvalue = 100.0;
+	double contour_minvalue = 0.0;
 };
