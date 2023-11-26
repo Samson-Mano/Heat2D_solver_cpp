@@ -726,6 +726,8 @@ void geom_store::paint_model_results()
 		// Execute the close sequence
 		if (is_heat_analysis_complete == true)
 		{
+			// sol_window->heat_analysis_complete = false;
+			// sol_window->set_maxmin(model_contourresults.contour_max_vals, model_contourresults.contour_min_vals);
 			// Heat analysis is complete
 			update_model_transperency(false);
 		}
@@ -756,6 +758,7 @@ void geom_store::paint_model_results()
 		// Execute the open sequence
 		if (is_heat_analysis_complete == true)
 		{
+			sol_window->heat_analysis_complete = true;
 			sol_window->set_maxmin(model_contourresults.contour_max_vals, model_contourresults.contour_min_vals);
 			// Heat analysis is complete
 			update_model_transperency(true);
@@ -779,6 +782,7 @@ void geom_store::paint_model_results()
 		// Check whether the heat analysis is complete or not
 		if (is_heat_analysis_complete == true)
 		{
+			sol_window->heat_analysis_complete = true;
 			sol_window->set_maxmin(model_contourresults.contour_max_vals, model_contourresults.contour_min_vals);
 			// Reset the buffers for heat result contour
 			model_contourresults.set_buffer();

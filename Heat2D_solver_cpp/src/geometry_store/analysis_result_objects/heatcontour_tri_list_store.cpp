@@ -202,7 +202,7 @@ void heatcontour_tri_list_store::set_contour_lines()
 		// remove the added
 		cpy_heatcontourlineMap.erase(cpy_heatcontourlineMap.begin());
 
-		for (int i = 1; i < static_cast<int>(cpy_heatcontourlineMap.size()); i++)
+		for (int i = 0; i < static_cast<int>(cpy_heatcontourlineMap.size()); i++)
 		{
 			// Get the poly line start and end point
 			glm::vec2 currentPolyline_startpt = temp_currentPolyline.poly_line_pts[0];
@@ -221,6 +221,7 @@ void heatcontour_tri_list_store::set_contour_lines()
 
 				// remove the added
 				cpy_heatcontourlineMap.erase(cpy_heatcontourlineMap.begin() + i);
+				i = 0;
 				continue;
 			}
 
@@ -233,6 +234,7 @@ void heatcontour_tri_list_store::set_contour_lines()
 
 				// remove the added
 				cpy_heatcontourlineMap.erase(cpy_heatcontourlineMap.begin() + i);
+				i = 0;
 				continue;
 			}
 
@@ -245,6 +247,7 @@ void heatcontour_tri_list_store::set_contour_lines()
 
 				// remove the added
 				cpy_heatcontourlineMap.erase(cpy_heatcontourlineMap.begin() + i);
+				i = 0;
 				continue;
 			}
 
@@ -256,6 +259,7 @@ void heatcontour_tri_list_store::set_contour_lines()
 				polylines_data[j].poly_line_pts.push_back(contourline_startpt);
 				// remove the added
 				cpy_heatcontourlineMap.erase(cpy_heatcontourlineMap.begin() + i);
+				i = 0;
 				continue;
 			}
 		}

@@ -54,25 +54,24 @@ void analysis_window::render_window()
 		is_show_window = false; // set the flag to close the window
 	}
 
-	// Example values
-	float minValue = contour_minvalue;
-	float maxValue = contour_maxvalue;
-	int numLevels = 5;
-
-	// Show contour bars in the ImGui window
-	ImGui::Text("Contour Bars");
-
-	// Plot the contour bars
-	if (ImPlot::BeginPlot("ContourBars", nullptr, nullptr, ImVec2(-1, 150)))
+	if (heat_analysis_complete == true)
 	{
-		ImPlot::SetNextPlotLimitsY(minValue, maxValue);
-		for (int i = 0; i < numLevels; ++i)
-		{
-			float levelValue = minValue + static_cast<float>(i) / (numLevels - 1) * (maxValue - minValue);
-			ImPlot::PlotBars("", &levelValue, 1, 0.1f);
-		}
-		ImPlot::EndPlot();
+		// Contour Bar
+		float minValue = contour_minvalue;
+		float maxValue = contour_maxvalue;
+		int numLevels = 5;
+
+		// Show contour bars in the ImGui window
+		ImGui::Text("Contour Bar");
+
+		ImPlot::CreateContext();
+
+		static int cmap = ImPlotColormap_Jet;
+
+		ImPlot::ColormapScale("##Scale", minValue, maxValue, { 100,320.0f }, "%g \xC2\xB0 C", 0, cmap);
+		ImPlot::DestroyContext();
 	}
+
 
 	ImGui::End();
 

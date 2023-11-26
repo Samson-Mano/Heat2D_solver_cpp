@@ -1047,6 +1047,10 @@ void analysis_solver::get_reduced_global_matrices(const Eigen::MatrixXd& global_
 	Eigen::SparseMatrix<double>& reduced_global_k_matrix,
 	Eigen::SparseVector<double>& reduced_global_f_matrix)
 {
+	// Create a temporary matrices
+	Eigen::MatrixXd temp_reduced_global_k_matrix(reducedDOF, reducedDOF);
+	Eigen::VectorXd temp_reduced_global_f_matrix(reducedDOF);
+
 	int r = 0, s = 0;
 	for (int i = 0; i < numDOF; i++)
 	{
@@ -1057,7 +1061,7 @@ void analysis_solver::get_reduced_global_matrices(const Eigen::MatrixXd& global_
 		else
 		{
 			// apply boundary condition to global f matrix
-			reduced_global_f_matrix.coeffRef(r) = global_f_matrix.coeff(i) + global_spec_temp_matrix.coeff(i);
+			temp_reduced_global_f_matrix.coeffRef(r) = global_f_matrix.coeff(i) + global_spec_temp_matrix.coeff(i);
 			s = 0;
 			for (int j = 0; j < numDOF; j++)
 			{
@@ -1068,7 +1072,7 @@ void analysis_solver::get_reduced_global_matrices(const Eigen::MatrixXd& global_
 				else
 				{
 					// apply boundary condition to global k matrix
-					reduced_global_k_matrix.coeffRef(r, s) = global_k_matrix.coeff(i, j);
+					temp_reduced_global_k_matrix.coeffRef(r, s) = global_k_matrix.coeff(i, j);
 					s++;
 				}
 			}
@@ -1076,8 +1080,9 @@ void analysis_solver::get_reduced_global_matrices(const Eigen::MatrixXd& global_
 		}
 	}
 
-
-
+	// Copy data from dense to sparse
+	reduced_global_k_matrix = temp_reduced_global_k_matrix.sparseView();
+	reduced_global_f_matrix = temp_reduced_global_f_matrix.sparseView();
 }
 
 void analysis_solver::set_global_T_matrix(const Eigen::SparseVector<double>& reduced_global_T_matrix,
