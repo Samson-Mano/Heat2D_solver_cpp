@@ -51,6 +51,7 @@ void analysis_window::render_window()
 	{
 		execute_close = true;
 		execute_open = false;
+		heat_analysis_complete = false;
 		is_show_window = false; // set the flag to close the window
 	}
 
