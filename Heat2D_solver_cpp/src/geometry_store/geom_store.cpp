@@ -185,17 +185,18 @@ void geom_store::read_rawdata(std::ifstream& input_file)
 	int edge_count = 0;
 	for (const auto& tri_map : model_trielements.elementtriMap)
 	{
+		elementtri_store tri_elm = tri_map.second;
 		// Add the edges ( ! Note Only distinct edges are added, no copy)
 		// Edge 1 ( 1 -> 2)
-		this->model_edgeelements.add_elementline(edge_count, tri_map.second.nd1, tri_map.second.nd2);
+		this->model_edgeelements.add_elementline(edge_count, tri_elm.nd1, tri_elm.nd2);
 		edge_count = this->model_edgeelements.elementline_count;
 
 		// Edge 2 (2 -> 3)
-		this->model_edgeelements.add_elementline(edge_count, tri_map.second.nd2, tri_map.second.nd3);
+		this->model_edgeelements.add_elementline(edge_count, tri_elm.nd2, tri_elm.nd3);
 		edge_count = this->model_edgeelements.elementline_count;
 
 		// Edge 3 (3 -> 1)
-		this->model_edgeelements.add_elementline(edge_count, tri_map.second.nd3, tri_map.second.nd1);
+		this->model_edgeelements.add_elementline(edge_count, tri_elm.nd3, tri_elm.nd1);
 		edge_count = this->model_edgeelements.elementline_count;
 	}
 

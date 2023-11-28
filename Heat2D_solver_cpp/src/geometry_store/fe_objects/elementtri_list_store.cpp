@@ -16,7 +16,7 @@ void elementtri_list_store::init(geom_parameters* geom_param_ptr)
 	this->geom_param_ptr = geom_param_ptr;
 
 	// Set the geometry parameters for the labels (and clear the labels)
-		element_tris.init(geom_param_ptr);
+	element_tris.init(geom_param_ptr);
 	element_tris_shrunk.init(geom_param_ptr);
 	element_materialid.init(geom_param_ptr);
 	selected_element_tris_shrunk.init(geom_param_ptr);
@@ -28,7 +28,7 @@ void elementtri_list_store::init(geom_parameters* geom_param_ptr)
 
 void elementtri_list_store::add_elementtriangle(int& tri_id, node_store* nd1, node_store* nd2, node_store* nd3)
 {
-	// Add the line to the list
+	// Add the Triangle to the list
 	elementtri_store temp_tri;
 	temp_tri.tri_id = tri_id; // Triangle ID
 	temp_tri.nd1 = nd1;
@@ -42,7 +42,7 @@ void elementtri_list_store::add_elementtriangle(int& tri_id, node_store* nd1, no
 		return;
 	}
 
-	// Insert to the lines
+	// Insert to the triangles
 	elementtriMap.insert({ tri_id, temp_tri });
 	elementtri_count++;
 
@@ -91,16 +91,13 @@ void elementtri_list_store::add_selection_triangles(const std::vector<int>& sele
 		glm::vec2 node_pt3 = elementtriMap[it].nd3->node_pt; // Node pt 3
 
 
-		double midpt_x = (node_pt1.x + node_pt2.x + node_pt3.x) / 3.0f; // mid pt x
-		double midpt_y = (node_pt1.y + node_pt2.y + node_pt3.y) / 3.0f; // mid pt y
+		glm::vec2 midpt = glm::vec2((node_pt1.x + node_pt2.x + node_pt3.x) / 3.0f, // mid pt x
+			(node_pt1.y + node_pt2.y + node_pt3.y) / 3.0f); // mid pt y
 		double shrink_factor = geom_param_ptr->traingle_shrunk_factor;
 
-		glm::vec2 shrunk_node_pt1 = glm::vec2((midpt_x * (1 - shrink_factor) + (node_pt1.x * shrink_factor)),
-			(midpt_y * (1 - shrink_factor) + (node_pt1.y * shrink_factor)));
-		glm::vec2 shrunk_node_pt2 = glm::vec2((midpt_x * (1 - shrink_factor) + (node_pt2.x * shrink_factor)),
-			(midpt_y * (1 - shrink_factor) + (node_pt2.y * shrink_factor)));
-		glm::vec2 shrunk_node_pt3 = glm::vec2((midpt_x * (1 - shrink_factor) + (node_pt3.x * shrink_factor)),
-			(midpt_y * (1 - shrink_factor) + (node_pt3.y * shrink_factor)));
+		glm::vec2 shrunk_node_pt1 = geom_parameters::linear_interpolation(midpt, node_pt1, shrink_factor);
+		glm::vec2 shrunk_node_pt2 = geom_parameters::linear_interpolation(midpt, node_pt2, shrink_factor);
+		glm::vec2 shrunk_node_pt3 = geom_parameters::linear_interpolation(midpt, node_pt3, shrink_factor);
 
 		selected_element_tris_shrunk.add_tri(tri_id, shrunk_node_pt1, shrunk_node_pt2, shrunk_node_pt3,
 			glm::vec2(0), glm::vec2(0), glm::vec2(0),
@@ -112,7 +109,7 @@ void elementtri_list_store::add_selection_triangles(const std::vector<int>& sele
 
 }
 
-void elementtri_list_store::update_material(const std::vector<int> selected_element_tri,const int& material_id)
+void elementtri_list_store::update_material(const std::vector<int> selected_element_tri, const int& material_id)
 {
 	// Update the material ID
 	for (const int& it : selected_element_tri)
@@ -177,8 +174,8 @@ void elementtri_list_store::update_material_id_labels()
 		glm::vec2 nd_pt3 = elementtri.nd3->node_pt;
 
 		// Calculate the midpoint of the triangle
-		glm::vec2 tri_mid_pt = glm::vec2((nd_pt1.x + nd_pt2.x + nd_pt3.x) * 0.33333f, 
-										  (nd_pt1.y + nd_pt2.y + nd_pt3.y) * 0.33333f);
+		glm::vec2 tri_mid_pt = glm::vec2((nd_pt1.x + nd_pt2.x + nd_pt3.x) * 0.33333f,
+			(nd_pt1.y + nd_pt2.y + nd_pt3.y) * 0.33333f);
 
 		// Add the material ID
 		temp_color = geom_parameters::get_standard_color(elementtri.material_id);
@@ -220,7 +217,7 @@ std::vector<int> elementtri_list_store::is_tri_selected(const glm::vec2& corner_
 	// Covert mouse location to screen location
 	int max_dim = geom_param_ptr->window_width > geom_param_ptr->window_height ? geom_param_ptr->window_width : geom_param_ptr->window_height;
 
-	// Selected node list index;
+	// Selected triangle list index;
 	std::vector<int> selected_tri_index;
 
 	// Transform the mouse location to openGL screen coordinates
@@ -238,7 +235,7 @@ std::vector<int> elementtri_list_store::is_tri_selected(const glm::vec2& corner_
 
 	glm::mat4 scaledModelMatrix = scaling_matrix * geom_param_ptr->modelMatrix;
 
-	// Loop through all edges in map
+	// Loop through all triangles in map
 	for (auto it = elementtriMap.begin(); it != elementtriMap.end(); ++it)
 	{
 		const glm::vec2& node_pt1 = it->second.nd1->node_pt;

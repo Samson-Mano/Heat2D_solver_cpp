@@ -7,7 +7,7 @@ struct elementtri_store
 	int tri_id = 0; // ID of the triangle element
 	node_store* nd1 = nullptr; // node 1
 	node_store* nd2 = nullptr; // node 2
-	node_store* nd3 = nullptr; // node 2
+	node_store* nd3 = nullptr; // node 3
 	int material_id = 0;
 };
 
