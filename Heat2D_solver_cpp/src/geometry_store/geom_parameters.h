@@ -65,7 +65,7 @@ public:
 	glm::vec2 center = glm::vec2(0); // center of the geometry
 	glm::mat4 modelMatrix = glm::mat4(0); // Geometry model matrix
 	double geom_scale = 0.0; // Scale of the geometry
-	double geom_transparency = 0.0; // Value to control the geometry transparency
+	double geom_transparency = 1.0f; // Value to control the geometry transparency
 	double normalized_defl_scale = 0.0f; // Value of deflection scale
 	double defl_scale = 0.0f; // Value of deflection scale
 

@@ -288,10 +288,10 @@ void geom_store::update_model_matrix()
 	geom_param.modelMatrix = g_transl * glm::scale(glm::mat4(1.0f), glm::vec3(static_cast<float>(geom_param.geom_scale)));
 
 	// Update the model matrix
-	model_nodes.update_geometry_matrices(true, false, false, false, false);
-	model_edgeelements.update_geometry_matrices(true, false, false, false, false);
-	model_trielements.update_geometry_matrices(true, false, false, false, false);
-	model_constraints.update_geometry_matrices(true, false, false, false, false);
+	model_nodes.update_geometry_matrices(true, false, false, true, false);
+	model_edgeelements.update_geometry_matrices(true, false, false, true, false);
+	model_trielements.update_geometry_matrices(true, false, false, true, false);
+	model_constraints.update_geometry_matrices(true, false, false, true, false);
 
 	// Update the modal analysis result matrix
 	model_contourresults.update_geometry_matrices(true, false, false, false, false);
