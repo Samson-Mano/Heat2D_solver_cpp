@@ -523,8 +523,6 @@ void analysis_solver::heat_analysis_start(nodes_list_store& model_nodes,
 
 	}
 
-	model_contourresults.set_contour_lines(); // Set the contour lines
-
 	stopwatch_elapsed_str.str("");
 	stopwatch_elapsed_str << stopwatch.elapsed();
 	std::cout << "Results mapping complete at = " << stopwatch_elapsed_str.str() << std::endl;

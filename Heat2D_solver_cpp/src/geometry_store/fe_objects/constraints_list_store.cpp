@@ -111,8 +111,7 @@ void constraints_list_store::update_constraint_pts_labels()
 		// Add the points
 		for (auto cnst_pt : cnst_m.second.constraint_pts)
 		{
-			glm::vec2 temp_pt = glm::vec2(0);
-			constraint_points.add_point(pt_id, cnst_pt, temp_pt, cnst_color, false);
+			constraint_points.add_point(pt_id, cnst_pt, cnst_color);
 		}
 	}
 

@@ -26,9 +26,7 @@ void line_list_store::init(geom_parameters* geom_param_ptr)
 	lineMap.clear();
 }
 
-void line_list_store::add_line(int& line_id, glm::vec2& line_startpt_loc, glm::vec2& line_endpt_loc,
-	glm::vec2 line_startpt_offset, glm::vec2 line_endpt_offset,
-	glm::vec3& line_startpt_color, glm::vec3& line_endpt_color, bool is_offset)
+void line_list_store::add_line(int& line_id,const glm::vec2& line_startpt_loc, const glm::vec2& line_endpt_loc,const glm::vec3& line_color)
 {
 	// Create a temporary points
 	line_store temp_ln;
@@ -38,15 +36,8 @@ void line_list_store::add_line(int& line_id, glm::vec2& line_startpt_loc, glm::v
 	temp_ln.line_startpt_loc = line_startpt_loc;
 	temp_ln.line_endpt_loc = line_endpt_loc;
 
-	// Line offsets
-	temp_ln.line_startpt_offset = line_startpt_offset;
-	temp_ln.line_endpt_offset = line_endpt_offset;
-
 	// Line Color
-	temp_ln.line_startpt_color = line_startpt_color;
-	temp_ln.line_endpt_color = line_endpt_color;
-
-	temp_ln.is_offset = is_offset;
+	temp_ln.line_color = line_color;
 
 	// Reserve space for the new element
 	lineMap.reserve(lineMap.size() + 1);
@@ -60,8 +51,8 @@ void line_list_store::add_line(int& line_id, glm::vec2& line_startpt_loc, glm::v
 
 void line_list_store::set_buffer()
 {
-	// Define the node vertices of the model for a node (2 position, 2 defl, 3 color  & 1 defl value) 
-	const unsigned int line_vertex_count = 8 * 2 * line_count;
+	// Define the node vertices of the model for a node (2 position, 3 color) 
+	const unsigned int line_vertex_count = 5 * 2 * line_count;
 	float* line_vertices = new float[line_vertex_count];
 
 	unsigned int line_indices_count = 2 * line_count; // 1 indices to form a point
@@ -79,9 +70,7 @@ void line_list_store::set_buffer()
 
 	VertexBufferLayout line_pt_layout;
 	line_pt_layout.AddFloat(2);  // Node center
-	line_pt_layout.AddFloat(2);  // Node offset
 	line_pt_layout.AddFloat(3);  // Node Color
-	line_pt_layout.AddFloat(1);  // bool to track offset applied or not
 
 	unsigned int line_vertex_size = line_vertex_count * sizeof(float); // Size of the node_vertex
 
@@ -118,7 +107,6 @@ void line_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pant
 	if (set_modelmatrix == true)
 	{
 		// set the model matrix
-		line_shader.setUniform("geom_scale", static_cast<float>(geom_param_ptr->geom_scale));
 		line_shader.setUniform("transparency", 1.0f);
 
 		line_shader.setUniform("modelMatrix", geom_param_ptr->modelMatrix, false);
@@ -144,9 +132,7 @@ void line_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pant
 
 	if (set_deflscale == true)
 	{
-		// set the deflection scale
-		line_shader.setUniform("normalized_deflscale", static_cast<float>(geom_param_ptr->normalized_defl_scale));
-		line_shader.setUniform("deflscale", static_cast<float>(geom_param_ptr->defl_scale));
+
 	}
 }
 
@@ -158,42 +144,26 @@ void line_list_store::get_line_buffer(line_store& ln, float* line_vertices, unsi
 	line_vertices[line_v_index + 0] = ln.line_startpt_loc.x;
 	line_vertices[line_v_index + 1] = ln.line_startpt_loc.y;
 
-	// Point offset
-	line_vertices[line_v_index + 2] = ln.line_startpt_offset.x;
-	line_vertices[line_v_index + 3] = ln.line_startpt_offset.y;
-
 	// Point color
-	line_vertices[line_v_index + 4] = ln.line_startpt_color.x;
-	line_vertices[line_v_index + 5] = ln.line_startpt_color.y;
-	line_vertices[line_v_index + 6] = ln.line_startpt_color.z;
-
-	// Point offset bool
-	// Add the bool value (as an integer) to the array
-	line_vertices[line_v_index + 7] = static_cast<float>(ln.is_offset);
+	line_vertices[line_v_index + 2] = ln.line_color.x;
+	line_vertices[line_v_index + 3] = ln.line_color.y;
+	line_vertices[line_v_index + 4] = ln.line_color.z;
 
 	// Iterate
-	line_v_index = line_v_index + 8;
+	line_v_index = line_v_index + 5;
 
 	// End Point
 	// Point location
 	line_vertices[line_v_index + 0] = ln.line_endpt_loc.x;
 	line_vertices[line_v_index + 1] = ln.line_endpt_loc.y;
 
-	// Point offset
-	line_vertices[line_v_index + 2] = ln.line_endpt_offset.x;
-	line_vertices[line_v_index + 3] = ln.line_endpt_offset.y;
-
 	// Point color
-	line_vertices[line_v_index + 4] = ln.line_endpt_color.x;
-	line_vertices[line_v_index + 5] = ln.line_endpt_color.y;
-	line_vertices[line_v_index + 6] = ln.line_endpt_color.z;
-
-	// Point offset bool
-	// Add the bool value (as an integer) to the array
-	line_vertices[line_v_index + 7] = static_cast<float>(ln.is_offset);
+	line_vertices[line_v_index + 2] = ln.line_color.x;
+	line_vertices[line_v_index + 3] = ln.line_color.y;
+	line_vertices[line_v_index + 4] = ln.line_color.z;
 
 	// Iterate
-	line_v_index = line_v_index + 8;
+	line_v_index = line_v_index + 5;
 
 	//__________________________________________________________________________
 	// Add the indices

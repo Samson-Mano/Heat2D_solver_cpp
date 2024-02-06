@@ -62,8 +62,7 @@ void elementline_list_store::add_elementline(int& line_id, node_store* startNode
 	glm::vec2 end_node_pt = (*endNode).node_pt;
 
 	//__________________________ Add the lines
-	element_lines.add_line(line_id, start_node_pt, end_node_pt,
-		glm::vec2(0), glm::vec2(0), temp_color, temp_color, false);
+	element_lines.add_line(line_id, start_node_pt, end_node_pt, temp_color);
 
 }
 
@@ -78,7 +77,7 @@ void elementline_list_store::add_selection_lines(const std::vector<int>& selecte
 	for (const auto& it : selected_edge_ids)
 	{
 		selected_element_lines.add_line(elementlineMap[it].line_id, elementlineMap[it].startNode->node_pt, elementlineMap[it].endNode->node_pt,
-			glm::vec2(0),glm::vec2(0), temp_color, temp_color, false);
+			 temp_color);
 	}
 
 	// Set the selected element lines buffer

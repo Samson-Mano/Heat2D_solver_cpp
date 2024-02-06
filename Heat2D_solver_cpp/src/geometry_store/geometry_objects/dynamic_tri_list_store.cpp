@@ -1,16 +1,16 @@
-#include "tri_list_store.h"
+#include "dynamic_tri_list_store.h"
 
-tri_list_store::tri_list_store()
+dynamic_tri_list_store::dynamic_tri_list_store()
 {
 	// Empty constructor
 }
 
-tri_list_store::~tri_list_store()
+dynamic_tri_list_store::~dynamic_tri_list_store()
 {
 	// Empty destructor
 }
 
-void tri_list_store::init(geom_parameters* geom_param_ptr)
+void dynamic_tri_list_store::init(geom_parameters* geom_param_ptr)
 {
 	// Set the geometry parameters
 	this->geom_param_ptr = geom_param_ptr;
@@ -18,19 +18,21 @@ void tri_list_store::init(geom_parameters* geom_param_ptr)
 	// Create the point shader
 	std::filesystem::path shadersPath = geom_param_ptr->resourcePath;
 
-	tri_shader.create_shader((shadersPath.string() + "/resources/shaders/point_vert_shader.vert").c_str(),
-		(shadersPath.string() + "/resources/shaders/point_frag_shader.frag").c_str());
+	tri_shader.create_shader((shadersPath.string() + "/resources/shaders/dyntripoint_vert_shader.vert").c_str(),
+		(shadersPath.string() + "/resources/shaders/dyntripoint_frag_shader.frag").c_str());
 
 	// Delete all the triangles
 	tri_count = 0;
-	triMap.clear();
+	dyn_triMap.clear();
+
+
 }
 
-void tri_list_store::add_tri(int& tri_id, const glm::vec2& tript1_loc, const glm::vec2& tript2_loc, const glm::vec2& tript3_loc,
-	const glm::vec3& triangle_color)
+void dynamic_tri_list_store::add_tri(int& tri_id, const glm::vec2& tript1_loc, const glm::vec2& tript2_loc, const glm::vec2& tript3_loc, 
+	float tript1_mag_len, float tript2_mag_len, float tript3_mag_len)
 {
 	// Create a temporary points
-	tri_store temp_tri;
+	dynamic_tri_store temp_tri;
 	temp_tri.tri_id = tri_id;
 
 	// Boundary Node points
@@ -38,24 +40,26 @@ void tri_list_store::add_tri(int& tri_id, const glm::vec2& tript1_loc, const glm
 	temp_tri.tript2_loc = tript2_loc;
 	temp_tri.tript3_loc = tript3_loc;
 
-	// Boundary Node color (single color)
-	temp_tri.triangle_color = triangle_color;
+	// Boundary Node Magnitude
+	temp_tri.tript1_mag_len = tript1_mag_len;
+	temp_tri.tript2_mag_len = tript2_mag_len;
+	temp_tri.tript3_mag_len = tript3_mag_len;
 
 	// Reserve space for the new element
-	triMap.reserve(triMap.size() + 1);
+	dyn_triMap.reserve(dyn_triMap.size() + 1);
 
 	// Add to the list
-	triMap.push_back(temp_tri);
+	dyn_triMap.push_back(temp_tri);
 
 	// Iterate the point count
 	tri_count++;
+
 }
 
-
-void tri_list_store::set_buffer()
+void dynamic_tri_list_store::set_buffer()
 {
-	// Define the tri vertices of the model for a node (2 position, 3 color) 
-	const unsigned int tri_vertex_count = 5 * 3 * tri_count;
+	// Define the tri vertices of the model for a node (2 position, 1 magnitude) 
+	const unsigned int tri_vertex_count = 3 * 3 * tri_count;
 	float* tri_vertices = new float[tri_vertex_count];
 
 	unsigned int tri_indices_count = 3 * tri_count; // 3 indices to form a triangle
@@ -65,7 +69,7 @@ void tri_list_store::set_buffer()
 	unsigned int tri_i_index = 0;
 
 	// Set the tri vertices
-	for (auto& tri : triMap)
+	for (auto& tri : dyn_triMap)
 	{
 		// Add triangle buffers
 		get_tri_buffer(tri, tri_vertices, tri_v_index, tri_vertex_indices, tri_i_index);
@@ -73,7 +77,7 @@ void tri_list_store::set_buffer()
 
 	VertexBufferLayout tri_pt_layout;
 	tri_pt_layout.AddFloat(2);  // Node center
-	tri_pt_layout.AddFloat(3);  // Node Color
+	tri_pt_layout.AddFloat(1);  // bool to track offset applied or not
 
 	unsigned int tri_vertex_size = tri_vertex_count * sizeof(float); // Size of the node_vertex
 
@@ -85,7 +89,7 @@ void tri_list_store::set_buffer()
 	delete[] tri_vertex_indices;
 }
 
-void tri_list_store::paint_triangles()
+void dynamic_tri_list_store::paint_triangles()
 {
 	// Paint all the triangles
 	tri_shader.Bind();
@@ -95,19 +99,19 @@ void tri_list_store::paint_triangles()
 	tri_shader.UnBind();
 }
 
-void tri_list_store::clear_triangles()
+void dynamic_tri_list_store::clear_triangles()
 {
 	// Delete all the triangles
 	tri_count = 0;
-	triMap.clear();
+	dyn_triMap.clear();
 }
 
-void tri_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, bool set_zoomtranslation, bool set_transparency, bool set_deflscale)
+void dynamic_tri_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, bool set_zoomtranslation, bool set_transparency, bool set_deflscale)
 {
 	if (set_modelmatrix == true)
 	{
 		// set the model matrix
-		tri_shader.setUniform("transparency", 0.8f);
+		tri_shader.setUniform("transparency", 0.7f);
 
 		tri_shader.setUniform("modelMatrix", geom_param_ptr->modelMatrix, false);
 	}
@@ -132,51 +136,46 @@ void tri_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pantr
 
 	if (set_deflscale == true)
 	{
+		// set the deflection scale
 
 	}
 }
 
-void tri_list_store::get_tri_buffer(tri_store& tri, float* tri_vertices, unsigned int& tri_v_index, unsigned int* tri_vertex_indices, unsigned int& tri_i_index)
+void dynamic_tri_list_store::get_tri_buffer(dynamic_tri_store& dyn_tri, float* tri_vertices, unsigned int& tri_v_index, unsigned int* tri_vertex_indices, unsigned int& tri_i_index)
 {
 	// Get the three node buffer for the shader
 	// Point 1
 	// Point location
-	tri_vertices[tri_v_index + 0] = tri.tript1_loc.x;
-	tri_vertices[tri_v_index + 1] = tri.tript1_loc.y;
+	tri_vertices[tri_v_index + 0] = dyn_tri.tript1_loc.x;
+	tri_vertices[tri_v_index + 1] = dyn_tri.tript1_loc.y;
 
-	// Point color
-	tri_vertices[tri_v_index + 2] = tri.triangle_color.x;
-	tri_vertices[tri_v_index + 3] = tri.triangle_color.y;
-	tri_vertices[tri_v_index + 4] = tri.triangle_color.z;
+	// Point magnitude length
+	tri_vertices[tri_v_index + 2] = dyn_tri.tript1_mag_len;
 
 	// Iterate
-	tri_v_index = tri_v_index + 5;
+	tri_v_index = tri_v_index + 3;
 
 	// Point 2
 	// Point location
-	tri_vertices[tri_v_index + 0] = tri.tript2_loc.x;
-	tri_vertices[tri_v_index + 1] = tri.tript2_loc.y;
+	tri_vertices[tri_v_index + 0] = dyn_tri.tript2_loc.x;
+	tri_vertices[tri_v_index + 1] = dyn_tri.tript2_loc.y;
 
-	// Point color
-	tri_vertices[tri_v_index + 2] = tri.triangle_color.x;
-	tri_vertices[tri_v_index + 3] = tri.triangle_color.y;
-	tri_vertices[tri_v_index + 4] = tri.triangle_color.z;
+	// Point magnitude length
+	tri_vertices[tri_v_index + 2] = dyn_tri.tript2_mag_len;
 
 	// Iterate
-	tri_v_index = tri_v_index + 5;
+	tri_v_index = tri_v_index + 3;
 
 	// Point 3
 	// Point location
-	tri_vertices[tri_v_index + 0] = tri.tript3_loc.x;
-	tri_vertices[tri_v_index + 1] = tri.tript3_loc.y;
+	tri_vertices[tri_v_index + 0] = dyn_tri.tript3_loc.x;
+	tri_vertices[tri_v_index + 1] = dyn_tri.tript3_loc.y;
 
-	// Point color
-	tri_vertices[tri_v_index + 2] = tri.triangle_color.x;
-	tri_vertices[tri_v_index + 3] = tri.triangle_color.y;
-	tri_vertices[tri_v_index + 4] = tri.triangle_color.z;
+	// Point magnitude length
+	tri_vertices[tri_v_index + 2] = dyn_tri.tript3_mag_len;
 
 	// Iterate
-	tri_v_index = tri_v_index + 5;
+	tri_v_index = tri_v_index + 3;
 
 	//__________________________________________________________________________
 	// Add the indices

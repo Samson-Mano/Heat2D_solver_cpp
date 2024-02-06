@@ -9,13 +9,7 @@ struct line_store
 	glm::vec2 line_startpt_loc = glm::vec2(0);
 	glm::vec2 line_endpt_loc = glm::vec2(0);
 
-	glm::vec2 line_startpt_offset = glm::vec2(0);
-	glm::vec2 line_endpt_offset = glm::vec2(0);
-
-	glm::vec3 line_startpt_color = glm::vec3(0);
-	glm::vec3 line_endpt_color = glm::vec3(0);
-
-	bool is_offset = false;
+	glm::vec3 line_color = glm::vec3(0);
 };
 
 class line_list_store
@@ -28,9 +22,7 @@ public:
 	line_list_store();
 	~line_list_store();
 	void init(geom_parameters* geom_param_ptr);
-	void add_line(int& line_id, glm::vec2& line_startpt_loc,glm::vec2& line_endpt_loc,
-		glm::vec2 line_startpt_offset, glm::vec2 line_endpt_offset, 
-		glm::vec3& line_startpt_color, glm::vec3& line_endpt_color, bool is_offset);
+	void add_line(int& line_id, const glm::vec2& line_startpt_loc,const glm::vec2& line_endpt_loc,const	glm::vec3& line_color);
 	void set_buffer();
 	void paint_lines();
 	void clear_lines();
