@@ -320,6 +320,12 @@ glm::vec2 geom_parameters::calculateCatmullRomPoint(const std::vector<glm::vec2>
 }
 
 
+double geom_parameters::roundToSixDigits(const double& number)
+{
+	return std::round(number * 1e6) / 1e6;
+}
+
+
 // Stop watch
 void Stopwatch::reset_time()
 {

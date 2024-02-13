@@ -45,9 +45,6 @@ void dynamic_tri_list_store::add_tri(int& tri_id, const glm::vec2& tript1_loc, c
 	temp_tri.tript2_mag_len = tript2_mag_len;
 	temp_tri.tript3_mag_len = tript3_mag_len;
 
-	// Reserve space for the new element
-	dyn_triMap.reserve(dyn_triMap.size() + 1);
-
 	// Add to the list
 	dyn_triMap.push_back(temp_tri);
 

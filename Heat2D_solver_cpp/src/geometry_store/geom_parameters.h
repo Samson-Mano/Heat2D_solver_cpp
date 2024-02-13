@@ -104,6 +104,7 @@ public:
 
 	static glm::vec2 calculateCatmullRomPoint(const std::vector<glm::vec2>& controlPoints, float t);
 
+	static double roundToSixDigits(const double& number); 
 
 private:
 	static double HueToRGB(double v1, double v2, double vH);

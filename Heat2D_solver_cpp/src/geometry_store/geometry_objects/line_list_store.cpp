@@ -39,9 +39,6 @@ void line_list_store::add_line(int& line_id,const glm::vec2& line_startpt_loc, c
 	// Line Color
 	temp_ln.line_color = line_color;
 
-	// Reserve space for the new element
-	lineMap.reserve(lineMap.size() + 1);
-
 	// Add to the list
 	lineMap.push_back(temp_ln);
 

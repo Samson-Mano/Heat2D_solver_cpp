@@ -109,14 +109,14 @@ void geom_store::read_rawdata(std::ifstream& input_file)
 					splitValues.push_back(token);
 				}
 
-				if (static_cast<int>(splitValues.size()) != 3)
+				if (static_cast<int>(splitValues.size()) <= 3)
 				{
 					break;
 				}
 
 				int node_id = std::stoi(splitValues[0]); // node ID
-				double x = std::stod(splitValues[1]); // Node coordinate x
-				double y = std::stod(splitValues[2]); // Node coordinate y
+				double x = geom_parameters::roundToSixDigits(std::stod(splitValues[1])); // Node coordinate x
+				double y = geom_parameters::roundToSixDigits(std::stod(splitValues[2])); // Node coordinate y
 
 				glm::vec2 node_pt = glm::vec2(x, y);
 				node_pts_list.push_back(node_pt);
@@ -247,7 +247,69 @@ void geom_store::read_rawdata(std::ifstream& input_file)
 
 void geom_store::write_rawdata(std::ofstream& output_file)
 {
+	Stopwatch_events stopwatch;
+	stopwatch.start();
+	std::stringstream stopwatch_elapsed_str;
+	stopwatch_elapsed_str << std::fixed << std::setprecision(6);
 
+	std::cout << "Writing of input started" << std::endl;
+
+
+	// Write all the nodes
+	for (int i = 0; i<model_nodes.node_count; i++)
+	{
+		// Print the node details
+		const node_store& node = model_nodes.nodeMap[i+1];
+
+		// Write node data to the text file
+		output_file << "node, "
+			<< node.node_id - 1  << ", "
+			<< node.node_pt.x << ", "
+			<< node.node_pt.y << std::endl;
+	}
+
+	stopwatch_elapsed_str.str("");
+	stopwatch_elapsed_str << stopwatch.elapsed();
+	std::cout << "Nodes written at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
+
+	// Write all the lines
+	for (int i = 0; i < model_edgeelements.elementline_count; i++ )
+	{
+		// Print the line details
+		const elementline_store& line = model_edgeelements.elementlineMap[i];
+
+		// Write line data to the text file
+		output_file << "line, "
+			<< line.line_id << ", "
+			<< line.startNode->node_id - 1 << ", "
+			<< line.endNode->node_id - 1 << std::endl;
+	}
+
+
+	stopwatch_elapsed_str.str("");
+	stopwatch_elapsed_str << stopwatch.elapsed();
+	std::cout << "Edges written at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
+
+	// Write all the triangles
+	for (int i = 0; i < model_trielements.elementtri_count; i++)
+	{
+		// Print the line details
+		const elementtri_store& tri = model_trielements.elementtriMap[i + 1];
+
+		// Write line data to the text file
+		output_file << "tria, "
+			<< tri.tri_id - 1 << ", "
+			<< tri.nd1->node_id - 1 << ", "
+			<< tri.nd2->node_id - 1 << ", "
+			<< tri.nd3->node_id - 1 << std::endl;
+	}
+
+
+	stopwatch_elapsed_str.str("");
+	stopwatch_elapsed_str << stopwatch.elapsed();
+	std::cout << "Elements written at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
+
+	std::cout << "Model written " << std::endl;
 }
 
 void geom_store::update_WindowDimension(const int& window_width, const int& window_height)
@@ -295,7 +357,7 @@ void geom_store::update_model_matrix()
 
 	// Update the modal analysis result matrix
 	model_contourresults.update_geometry_matrices(true, false, false, false, false);
-	
+
 }
 
 void geom_store::update_model_zoomfit()
@@ -317,7 +379,7 @@ void geom_store::update_model_zoomfit()
 
 	// Update the modal analysis result matrix
 	model_contourresults.update_geometry_matrices(false, true, true, false, false);
-	
+
 }
 
 void geom_store::update_model_pan(glm::vec2& transl)
@@ -339,7 +401,7 @@ void geom_store::update_model_pan(glm::vec2& transl)
 
 	// Update the modal analysis result matrix
 	model_contourresults.update_geometry_matrices(false, true, false, false, false);
-	
+
 }
 
 void geom_store::update_model_zoom(double& z_scale)
@@ -358,7 +420,7 @@ void geom_store::update_model_zoom(double& z_scale)
 
 	// Update the modal analysis result matrix
 	model_contourresults.update_geometry_matrices(false, false, true, false, false);
-	
+
 }
 
 void geom_store::update_model_transperency(bool is_transparent)
@@ -476,7 +538,7 @@ void geom_store::paint_model()
 		// Show the model edges
 		model_edgeelements.paint_elementlines();
 	}
-	
+
 	if (op_window->is_show_modelnodes == true)
 	{
 		// Show the model nodes
@@ -644,7 +706,7 @@ void geom_store::paint_model()
 				glm::vec2 pt1 = model_trielements.elementtriMap[id].nd1->node_pt;
 				glm::vec2 pt2 = model_trielements.elementtriMap[id].nd2->node_pt;
 				glm::vec2 pt3 = model_trielements.elementtriMap[id].nd3->node_pt;
-				glm::vec2 tri_midpt = glm::vec2((pt1.x + pt2.x + pt3.x)*0.3333f, (pt1.y + pt2.y + pt3.y) * 0.3333f);
+				glm::vec2 tri_midpt = glm::vec2((pt1.x + pt2.x + pt3.x) * 0.3333f, (pt1.y + pt2.y + pt3.y) * 0.3333f);
 
 				// Constraint triangle mid point list
 				cnst_pts.push_back(tri_midpt);
@@ -673,7 +735,7 @@ void geom_store::paint_model()
 			// Selection rectangle
 		selection_rectangle.paint_selection_rectangle();
 
-				// Paint the selected elements
+		// Paint the selected elements
 		if (elm_prop_window->is_selected_count == true)
 		{
 			model_trielements.paint_selected_elementtriangles();
@@ -787,7 +849,7 @@ void geom_store::paint_model_results()
 			sol_window->set_maxmin(model_contourresults.contour_max_vals, model_contourresults.contour_min_vals);
 			// Reset the buffers for heat result contour
 			model_contourresults.set_buffer();
-			
+
 			// Heat analysis is complete (Transperency change)
 			update_model_transperency(true);
 		}

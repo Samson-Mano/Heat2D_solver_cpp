@@ -34,9 +34,6 @@ void point_list_store::add_point(int& point_id, const glm::vec2& point_loc, cons
 	temp_pt.point_loc = point_loc;
 	temp_pt.point_color = point_color;
 
-	// Reserve space for the new element
-	pointMap.reserve(pointMap.size() + 1);
-
 	// Add to the list
 	pointMap.push_back(temp_pt);
 

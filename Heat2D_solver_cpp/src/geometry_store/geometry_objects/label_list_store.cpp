@@ -43,9 +43,6 @@ void label_list_store::add_text(std::string& label, glm::vec2& label_loc, glm::v
 	temp_label.label_above_loc = above_point;
 	temp_label.is_offset = is_offset;
 
-	// Reserve space for the new element
-	labels.reserve(labels.size() + 1);
-
 	// Add to the list
 	labels.push_back(temp_label);
 

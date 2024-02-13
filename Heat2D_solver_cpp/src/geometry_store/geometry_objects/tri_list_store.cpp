@@ -41,9 +41,6 @@ void tri_list_store::add_tri(int& tri_id, const glm::vec2& tript1_loc, const glm
 	// Boundary Node color (single color)
 	temp_tri.triangle_color = triangle_color;
 
-	// Reserve space for the new element
-	triMap.reserve(triMap.size() + 1);
-
 	// Add to the list
 	triMap.push_back(temp_tri);
 

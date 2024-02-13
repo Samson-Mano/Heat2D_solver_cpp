@@ -111,7 +111,7 @@ void file_events::export_rawdata_geometry(geom_store& geom)
 	}
 
 	// Write the model as raw data
-	// geom.write_rawdata(output_file);
+	geom.write_rawdata(output_file);
 
 	// Close the file
 	output_file.close();
